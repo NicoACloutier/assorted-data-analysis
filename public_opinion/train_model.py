@@ -20,7 +20,7 @@ def main():
     labels = [] #list of labels (0 for Google, 1 for Microsoft, 2 for Tesla)
     for index, company in enumerate(companies):
         tweets = pd.read_csv(f'{company}.csv')['Content'].to_list() #read tweets in csv file
-        tweets = [re.sub(company, '', tweet, re.I) for tweet in tweets] #remove company name from tweets
+        tweets = [re.sub(company, '[MASK]', tweet, re.I) for tweet in tweets] #remove company name from tweets
         tweets = [tok(tweet) for tweet in tweets] #tokenize tweets
         all_tweets += tweets #add tweets to big list of tweets
         
@@ -46,9 +46,9 @@ def main():
     training_args = TrainingArguments(
         output_dir='test_trainer', 
         evaluation_strategy='epoch', 
-        num_train_epochs=3,
+        num_train_epochs=5,
         save_steps=10000,
-        learning_rate = 0.01
+        learning_rate = 0.001
     )
     
     #define the trainer
