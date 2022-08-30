@@ -48,7 +48,7 @@ def main():
         evaluation_strategy='epoch', 
         num_train_epochs=5,
         save_steps=10000,
-        learning_rate = 0.001
+        learning_rate = 0.01
     )
     
     #define the trainer
