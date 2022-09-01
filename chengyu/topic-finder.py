@@ -4,38 +4,30 @@ def main():
     from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
     from collections import Counter
     
-    chengyu = pd.read_csv('chengyu-appearances.csv')
+    chengyu_dg = pd.read_csv('all-sentences.csv')
     del chengyu['Unnamed: 0']
-    appearing_idioms = chengyu['Chengyu'].to_list()
+    appearing_chengyu = chengyu_df['chengyu'].to_list()
+    sentences = chengyu_df['sentences'].to_list()
     
     model = AutoModelForSequenceClassification.from_pretrained('uer/roberta-base-finetuned-chinanews-chinese')
     tokenizer = AutoTokenizer.from_pretrained('uer/roberta-base-finetuned-chinanews-chinese')
     text_classification = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
 
-    topics = []
-    text_df = pd.read_csv('train.csv', encoding='utf8')
-    texts = text_df['content'].to_list()
-    texts = ' '.join(texts)
-    for i, idiom in enumerate(appearing_idioms):
-        examples = re.findall(f'(?<=[。！？.!? ]).+?{idiom}.+?[ 。！？.!?]', texts)
-        try:
-            if examples:
-                topics = text_classification(examples)
-                topics = [item['label'] for item in topics]
-                topics = Counter(topics)
-                counts = [topics[item] for item in topics]
-                topics = list(topics)
-                maximum = max(counts)
-                max_index = counts.index(maximum)
-                topic = topics[max_index]
-                topics.append(topic)
-            else: topics.append('None')
-        except Exception:
-            topics.append('None')
-        if i+1 % 1 == 0:
-            print((i+1)*100/len(appearing_idioms))
+    all_sentences = []
+    for sentence in sentences:
+        if isinstance(sentence, list):
+            sentence = sentence.split(' ')
+            all_sentences += sentence
+    all_sentences = list(set(all_sentences))
+
+    classified = text_classification(all_sentences)
+    classified = [Counter(item['label']) for item in classified]
     
-    topics_df = pd.DataFrame([appearing_idioms, topics], ['Chengyu', 'Topic'])
+    topic_dict = dict()
+    for i, sentence in enumarete(all_sentences):
+        topic_counter = classified[i]
+        topic = max(topic_counter, key=topic_counter.get)
+        topic_dict[sentence] = topic
     
     topics_df.to_csv('topics.csv')
 
