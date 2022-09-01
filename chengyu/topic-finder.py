@@ -32,6 +32,8 @@ def main():
             else: topics.append('None')
         except Exception:
             topics.append('None')
+        if i+1 % 1 == 0:
+            print((i+1)*100/len(appearing_idioms))
     
     topics_df = pd.DataFrame([appearing_idioms, topics], ['Chengyu', 'Topic'])
     
