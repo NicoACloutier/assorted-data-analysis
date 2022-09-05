@@ -2,30 +2,60 @@ using DataFrames
 using CSV
 using DataStructures
 
-mostcommon(c::Accumulator) = mostcommon(c, length(c))
+mostcommon(c::Accumulator) = mostcommon(c, 1)
 mostcommon(c::Accumulator, k) = sort(collect(c), by=kv->kv[2], rev=true)[1:k]
 
-function getclassifications(wordlist, sentencelist, classifications)
-	topics = []
-	for word in wordlist
-		sentencelist = [sentence for sentence in sentencelist if word in sentence]
-		topiclist = [classifications[sentence] for sentence in sentencelist]
-		topiccounter = counter(topiclist)
-		topic = mostcommon(topiccounter)
-		push!(topics, topic)
+function findadjustments(topiclist)
+	finaldict = Dict()
+	classifiedcounter = counter(topiclist)
+	commonvalue = mostcommon(classifiedcounter)
+	commonvalue, _ = first(commonvalue)
+	appearances = classifiedcounter[commonvalue]
+	for (value, tempappearances) in classifiedcounter
+		adjustment = appearances / tempappearances
+		finaldict[value] = round(Int, adjustment)
 	end
+	finaldict["None"] = 1
+	finaldict
 end
 
-chengyudf = DataFrame(CSV.File("all-chengyu.csv"))
+function adjust(inputcounter, adjustmentdict)
+	for (topic, adjustment) in adjustmentdict
+		inputcounter[topic] *= adjustment
+	end
+	inputcounter
+end
+
+function getclassifications(wordlist, sentencelist, classifications, adjustdict)
+	topics = []
+	for word in wordlist
+		sentences = [sentence for sentence in sentencelist if occursin(word, sentence)]
+		topiclist = [classifications[sentence] for sentence in sentences]
+		topiccounter = counter(topiclist)
+		topiccounter = adjust(topiccounter, adjustdict)
+		if isempty(topiccounter)
+			topic = "None"
+		else
+			topic = mostcommon(topiccounter)
+			topic, _ = first(topic)
+		end
+		push!(topics, topic)
+	end
+	topics
+end
+
+chengyudf = DataFrame(CSV.File("chengyu-appearances.csv"))
 sentencedf = DataFrame(CSV.File("all-sentences.csv"))
 chengyulist = collect(chengyudf.Chengyu)
 sentencelist = collect(sentencedf.sentences)
 classifiedlist = collect(sentencedf.classified)
 
-sentences = Dict(sentencelist[i]=>classifiedlist[i] for i = 1:length(sentencelist))
+adjustdict = findadjustments(classifiedlist)
 
-classifications = getclassifications(chengyulist, sentencelist, classifiedlist)
+sentences = Dict(zip(sentencelist, classifiedlist))
 
-chengyudf.topics = classifications
+classifications = getclassifications(chengyulist, sentencelist, sentences, adjustdict)
 
-print(chengyudf)
+chengyudf.Topic = classifications
+
+CSV.write("chengyu-appearances.csv", chengyudf)
