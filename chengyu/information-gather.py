@@ -3,7 +3,7 @@ def main():
     import re
 
     chengyu = pd.read_csv('chengyu-appearances.csv') #get appearing chengyu
-    del chengyu['Unnamed: 0'] #delete unnecessary column
+    del chengyu['Column1'] #delete unnecessary column
     appearing_idioms = chengyu['Chengyu'].to_list() #write series of chengyu to list
     
     #create meaning dictionary
