@@ -1,6 +1,7 @@
 def main():
     import pandas as pd
     import re
+    from pypinyin import pinyin
 
     chengyu = pd.read_csv('chengyu-appearances.csv') #get appearing chengyu
     del chengyu['Column1'] #delete unnecessary column
@@ -36,6 +37,23 @@ def main():
         elif appearance == 1: scores.append(1) #append 1 if it appears
         else: scores.append(0) #otherwise, append 0
     chengyu['Frequency'] = scores #add frequency column to dataframe
+    
+    #get pinyin
+    pinyin_list = []
+    for idiom in appearing_idioms:
+        pinyin_list.append(' '.join([item[0] for item in pinyin(idiom)])) #convert chengyu to pinyin
+    chengyu['Pinyin'] = pinyin_list
+    
+    #get english definitions
+    definitions = []
+    english = pd.read_csv('en-definitions.csv')
+    en_chengyu = english['Chengyu'].to_list()
+    en_defs = english['Definition'].to_list()
+    en_dict = dict(zip(en_chengyu, en_defs))
+    for idiom in appearing_idioms:
+        definition = en_dict[idiom]
+        definitions.append(definition)
+    chengyu['English Definition'] = definitions
     
     #get an example sentence for each chengyu
     examples = []

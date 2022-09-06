@@ -35,7 +35,7 @@ def main():
     
     output_df = pd.DataFrame([incomplete_list, definition_list], ["Chengyu", "Definition"])
     output_df = output_df.transpose()
-    output_df.to_csv("en-definitionsquestion.csv")
+    output_df.to_csv("en-definitions.csv")
     
 
 if __name__ == '__main__':
