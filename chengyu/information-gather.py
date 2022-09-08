@@ -14,10 +14,17 @@ def main():
     file.close() #close file
     chengyu_list = re.findall('(?<=<div id=""ent"">)....(?=</div> <div id=""from"">)', raw_text) #find all chengyu
     definition_list = re.findall('(?<=<span id=""from_content"">).+?(?=</span> </div>)', raw_text) #find all definitions
+    explain_list = re.findall('(?<=<span id=""trans_content"">).+?(?=</span>)', raw_text) #find all explanations
+    
     meaning_dict = dict() #create a meaning dictionary
     for i, idiom in enumerate(chengyu_list):
         definition = definition_list[i] #fetch definition
         meaning_dict[idiom] = definition #set meaning_dict for that chengyu to the definition
+    
+    explain_dict = dict() #create a meaning dictionary
+    for i, idiom in enumerate(chengyu_list):
+        explanation = explain_list[i] #fetch definition
+        explain_dict[idiom] = explanation #set meaning_dict for that chengyu to the definition
     
     #add definition column to dataframe
     definition_list = []
@@ -25,6 +32,13 @@ def main():
         meaning = meaning_dict[idiom] #fetch meaning
         definition_list.append(meaning) #add to list of appearing definitions
     chengyu['Definition'] = definition_list #add definitions column to dataframe
+    
+    #add explanation column to dataframe
+    explain_list = []
+    for idiom in appearing_idioms:
+        explanation = explain_dict[idiom] #fetch explanation
+        explain_list.append(explanation) #add to list of appearing explanations
+    chengyu['Explanation'] = explain_list #add explanations column to dataframe
     
     #add frequency score out of 5 column to dataframe
     scores = []
@@ -46,14 +60,27 @@ def main():
     
     #get english definitions
     definitions = []
-    english = pd.read_csv('en-definitions.csv')
-    en_chengyu = english['Chengyu'].to_list()
-    en_defs = english['Definition'].to_list()
-    en_dict = dict(zip(en_chengyu, en_defs))
+    english = pd.read_csv('en-definitions.csv') #read translated csv
+    en_chengyu = english['Chengyu'].to_list() #get chengyu
+    en_defs = english['Definition'].to_list() #get definitions
+    en_dict = dict(zip(en_chengyu, en_defs)) #make dictionary
+    #put definitions in right order
     for idiom in appearing_idioms:
         definition = en_dict[idiom]
         definitions.append(definition)
-    chengyu['English Definition'] = definitions
+    chengyu['English Definition'] = definitions #make english definition column
+    
+    #get english explanations
+    explanations = []
+    english = pd.read_csv('en-explanations.csv') #read translated csv
+    en_chengyu = english['Chengyu'].to_list() #get chengyu
+    en_explain = english['Explanation'].to_list() #get explanations
+    en_dict = dict(zip(en_chengyu, en_explain)) #make dictionary
+    #put explanations in right order
+    for idiom in appearing_idioms:
+        explanation = en_dict[idiom]
+        explanations.append(explanation)
+    chengyu['English Explanation'] = explanations #make english explanation column
     
     #get an example sentence for each chengyu
     examples = []

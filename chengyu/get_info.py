@@ -9,7 +9,7 @@ def make_freq(number):
     return output
 
 #read data
-df = pd.read_csv('Chengyu-Final.csv')
+df = pd.read_csv('Chengyu-Final.csv', encoding='utf8')
 del df['Unnamed: 0']
 key_list = df['Chengyu'].to_list()
 
@@ -23,7 +23,16 @@ def chengyu(key):
         i = key_list.index(key) #get the row index
         o = df.iloc[i] # find row
         #print info
-        print(f"{o['Chengyu']}: {o['Pinyin']}\n\nDefinition: {o['Definition']}\nTranslation: {o['English Definition']}\n\n{o['Topic']}, {make_freq(int(o['Frequency']))}\n\n{o['Example']}")
+        print(f"""{o['Chengyu']}: {o['Pinyin']}
+Definition: {o['Definition']}
+Translation: {o['English Definition']}
+
+Explanation: {o['Explanation']}
+Translation: {o['English Explanation']}
+        
+{o['Topic']}, {make_freq(int(o['Frequency']))}
+        
+Example: {o['Example']}""")
     else:
         print(f'{key} not found.')
     
