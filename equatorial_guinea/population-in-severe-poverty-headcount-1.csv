@@ -1,0 +1,86 @@
+id,utc_created,utc_updated,country,country_code,indicator_code,indicator,value,year
+1,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Afghanistan,AFG,101006,"MPI: Population in severe poverty (headcount)",29.8,2013
+2,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Albania,ALB,101006,"MPI: Population in severe poverty (headcount)",0.1,2013
+3,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Argentina,ARG,101006,"MPI: Population in severe poverty (headcount)",0.5,2013
+4,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Armenia,ARM,101006,"MPI: Population in severe poverty (headcount)",0.1,2013
+5,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Azerbaijan,AZE,101006,"MPI: Population in severe poverty (headcount)",0.2,2013
+6,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Burundi,BDI,101006,"MPI: Population in severe poverty (headcount)",48.2,2013
+7,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Benin,BEN,101006,"MPI: Population in severe poverty (headcount)",45.7,2013
+8,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Burkina Faso",BFA,101006,"MPI: Population in severe poverty (headcount)",63.8,2013
+9,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Bangladesh,BGD,101006,"MPI: Population in severe poverty (headcount)",21,2013
+10,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Belize,BLZ,101006,"MPI: Population in severe poverty (headcount)",1.5,2013
+11,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Bolivia (Plurinational State of)",BOL,101006,"MPI: Population in severe poverty (headcount)",7.8,2013
+12,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Brazil,BRA,101006,"MPI: Population in severe poverty (headcount)",0.5,2013
+13,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Bhutan,BTN,101006,"MPI: Population in severe poverty (headcount)",8.8,2013
+14,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Central African Republic",CAF,101006,"MPI: Population in severe poverty (headcount)",48.5,2013
+15,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",China,CHN,101006,"MPI: Population in severe poverty (headcount)",1.3,2013
+16,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Côte d'Ivoire",CIV,101006,"MPI: Population in severe poverty (headcount)",0.1,2013
+17,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Cameroon,CMR,101006,"MPI: Population in severe poverty (headcount)",27.1,2013
+18,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Congo (Democratic Republic of the)",COD,101006,"MPI: Population in severe poverty (headcount)",46.2,2013
+19,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Congo,COG,101006,"MPI: Population in severe poverty (headcount)",12.2,2013
+20,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Colombia,COL,101006,"MPI: Population in severe poverty (headcount)",1.8,2013
+21,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Djibouti,DJI,101006,"MPI: Population in severe poverty (headcount)",11.1,2013
+22,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Dominican Republic",DOM,101006,"MPI: Population in severe poverty (headcount)",1.4,2013
+23,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Egypt,EGY,101006,"MPI: Population in severe poverty (headcount)",1.5,2013
+24,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Ethiopia,ETH,101006,"MPI: Population in severe poverty (headcount)",67,2013
+25,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Gabon,GAB,101006,"MPI: Population in severe poverty (headcount)",4.4,2013
+26,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Georgia,GEO,101006,"MPI: Population in severe poverty (headcount)",0.1,2013
+27,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Ghana,GHA,101006,"MPI: Population in severe poverty (headcount)",12.1,2013
+28,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Guinea,GIN,101006,"MPI: Population in severe poverty (headcount)",68.6,2013
+29,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Gambia,GMB,101006,"MPI: Population in severe poverty (headcount)",35.9,2013
+30,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Guinea-Bissau,GNB,101006,"MPI: Population in severe poverty (headcount)",58.4,2013
+31,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Guyana,GUY,101006,"MPI: Population in severe poverty (headcount)",1.2,2013
+32,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Honduras,HND,101006,"MPI: Population in severe poverty (headcount)",7.2,2013
+33,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Haiti,HTI,101006,"MPI: Population in severe poverty (headcount)",20.1,2013
+34,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Indonesia,IDN,101006,"MPI: Population in severe poverty (headcount)",1.1,2013
+35,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",India,IND,101006,"MPI: Population in severe poverty (headcount)",27.8,2013
+36,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Iraq,IRQ,101006,"MPI: Population in severe poverty (headcount)",2.5,2013
+37,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Jordan,JOR,101006,"MPI: Population in severe poverty (headcount)",0.1,2013
+38,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Kenya,KEN,101006,"MPI: Population in severe poverty (headcount)",15.7,2013
+39,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Kyrgyzstan,KGZ,101006,"MPI: Population in severe poverty (headcount)",0.3,2013
+40,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Cambodia,KHM,101006,"MPI: Population in severe poverty (headcount)",16.4,2013
+41,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Lao People's Democratic Republic",LAO,101006,"MPI: Population in severe poverty (headcount)",18.8,2013
+42,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Liberia,LBR,101006,"MPI: Population in severe poverty (headcount)",52.8,2013
+43,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Lesotho,LSO,101006,"MPI: Population in severe poverty (headcount)",18.2,2013
+44,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Moldova (Republic of)",MDA,101006,"MPI: Population in severe poverty (headcount)",0.2,2013
+45,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Madagascar,MDG,101006,"MPI: Population in severe poverty (headcount)",48,2013
+46,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Maldives,MDV,101006,"MPI: Population in severe poverty (headcount)",0.1,2013
+47,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Mexico,MEX,101006,"MPI: Population in severe poverty (headcount)",1.1,2013
+48,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","The former Yugoslav Republic of Macedonia",MKD,101006,"MPI: Population in severe poverty (headcount)",0.1,2013
+49,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Mali,MLI,101006,"MPI: Population in severe poverty (headcount)",66.8,2013
+50,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Montenegro,MNE,101006,"MPI: Population in severe poverty (headcount)",0.5,2013
+51,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Mongolia,MNG,101006,"MPI: Population in severe poverty (headcount)",4.2,2013
+52,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Mozambique,MOZ,101006,"MPI: Population in severe poverty (headcount)",44.1,2013
+53,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Mauritania,MRT,101006,"MPI: Population in severe poverty (headcount)",42.3,2013
+54,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Malawi,MWI,101006,"MPI: Population in severe poverty (headcount)",29.8,2013
+55,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Namibia,NAM,101006,"MPI: Population in severe poverty (headcount)",15.7,2013
+56,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Niger,NER,101006,"MPI: Population in severe poverty (headcount)",73.5,2013
+57,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Nigeria,NGA,101006,"MPI: Population in severe poverty (headcount)",25.7,2013
+58,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Nicaragua,NIC,101006,"MPI: Population in severe poverty (headcount)",6.9,2013
+59,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Nepal,NPL,101006,"MPI: Population in severe poverty (headcount)",18.6,2013
+60,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Pakistan,PAK,101006,"MPI: Population in severe poverty (headcount)",26.5,2013
+61,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Peru,PER,101006,"MPI: Population in severe poverty (headcount)",2.1,2013
+62,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Philippines,PHL,101006,"MPI: Population in severe poverty (headcount)",5,2013
+63,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Rwanda,RWA,101006,"MPI: Population in severe poverty (headcount)",34.6,2013
+64,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Senegal,SEN,101006,"MPI: Population in severe poverty (headcount)",45.1,2013
+65,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Sierra Leone",SLE,101006,"MPI: Population in severe poverty (headcount)",46.4,2013
+66,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Somalia,SOM,101006,"MPI: Population in severe poverty (headcount)",63.6,2013
+67,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Sao Tome and Principe",STP,101006,"MPI: Population in severe poverty (headcount)",16.4,2013
+68,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Suriname,SUR,101006,"MPI: Population in severe poverty (headcount)",2,2013
+69,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Swaziland,SWZ,101006,"MPI: Population in severe poverty (headcount)",7.4,2013
+70,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Syrian Arab Republic",SYR,101006,"MPI: Population in severe poverty (headcount)",0.9,2013
+71,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Togo,TGO,101006,"MPI: Population in severe poverty (headcount)",26.4,2013
+72,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Thailand,THA,101006,"MPI: Population in severe poverty (headcount)",0.1,2013
+73,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Tajikistan,TJK,101006,"MPI: Population in severe poverty (headcount)",1.2,2013
+74,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Timor-Leste,TLS,101006,"MPI: Population in severe poverty (headcount)",31.5,2013
+75,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Trinidad and Tobago",TTO,101006,"MPI: Population in severe poverty (headcount)",0.2,2013
+76,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Tunisia,TUN,101006,"MPI: Population in severe poverty (headcount)",0.2,2013
+77,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","Tanzania (United Republic of)",TZA,101006,"MPI: Population in severe poverty (headcount)",32.1,2013
+78,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Uganda,UGA,101006,"MPI: Population in severe poverty (headcount)",33.3,2013
+79,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Uzbekistan,UZB,101006,"MPI: Population in severe poverty (headcount)",0.1,2013
+80,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Vietnam,VNM,101006,"MPI: Population in severe poverty (headcount)",1.3,2013
+81,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Vanuatu,VUT,101006,"MPI: Population in severe poverty (headcount)",7.3,2013
+82,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Yemen,YEM,101006,"MPI: Population in severe poverty (headcount)",18.4,2013
+83,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139","South Africa",ZAF,101006,"MPI: Population in severe poverty (headcount)",1.3,2013
+84,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Zambia,ZMB,101006,"MPI: Population in severe poverty (headcount)",31.3,2013
+85,"2016-01-07 10:10:52.689964","2016-01-07 10:10:52.690139",Zimbabwe,ZWE,101006,"MPI: Population in severe poverty (headcount)",12.2,2013
