@@ -1,8 +1,8 @@
 def main():
-    from selenium.webdriver.chrome.service import Service
-    from selenium import webdriver
+    import urllib.request
     import os
     import numpy
+    import time
     
     class City:
         def __init__(self, name, lat, lon, level, dates):
@@ -33,8 +33,8 @@ def main():
             lon_dif = max_lon - min_lon
             
             #get approximate pixel point from the bottom/left
-            lat_pos = (self.lat - min_lat) // 512
-            lon_pos = (self.lon - min_lon) // 512
+            lat_pos = (lat - min_lat) // 512
+            lon_pos = (lon - min_lon) // 512
             
             return (lat_pos, lon_pos)
         
@@ -66,11 +66,25 @@ def main():
     
     #define zoom level and get list of dates
     level = 7
-    dates = ['2022-01-07']
-    #for year in range(3):
-    #    for month in [add_zero(x+1) for x in range(12)]:
-    #        for day in [add_zero(x+1) for x in range(28)]:
-    #            dates.append(f'202{year}-{month}-{day}')
+    day_dict = {
+    '01': 31,
+    '02': 28,
+    '03': 31,
+    '04': 30,
+    '05': 31,
+    '06': 30,
+    '07': 31,
+    '08': 31,
+    '09': 30,
+    '10': 31,
+    '11': 30,
+    '12': 31,
+    }
+    dates = []
+    for month in [add_zero(x+1) for x in range(12)]:
+        days = day_dict[month]
+        for day in [add_zero(x+1) for x in range(days)]:
+            dates.append(f'2021-{month}-{day}')
     
     #make dictionary of information for cities
     info_list = [
@@ -93,15 +107,14 @@ def main():
                          info['lon'], info['level'], 
                          info['dates'])
         cities.append(temp_city)
-
-    service = Service(executable_path=os.environ['CHROMEDRIVER']) #initialize service
-    driver = webdriver.Chrome(service=service) #get chrome driver
-    for city in cities:
-        for url in city.url:
-            with open('img.png', 'wb') as f:
-                image = driver.find_element_by_xpath('//*[]')
     
-    driver.quit() #quit
+    start = time.time()
+    for city in cities:
+        for url in city.urls:
+            urllib.request.urlretrieve(url, "image.png")
+    end = time.time()
+    elapsed = end - start
+    print(f'{elapsed:.3f}')
 
 if __name__ == '__main__':
     main()
