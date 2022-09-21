@@ -7,11 +7,9 @@ import multiprocessing
 from numpy import asarray
 from PIL import Image
 from multiprocessing import Pool
-
-level = 7
     
 class City:
-    def __init__(self, name, lat, lon, date_length):
+    def __init__(self, name, lat, lon, date_length, level):
         self.name = name #name of the city
         self.row, self.col = self.get_tile(lat, lon, level) #row and column for the corresponding coordinates
         (self.lat_pos, self.lon_pos) = self.get_pos(self.row, self.col, lat, lon, level) #get position on image
@@ -150,6 +148,8 @@ def main():
             dates.append(f'2021-{month}-{day}')
     date_length = len(dates)
     
+    level = 7
+    
     #make dictionary of information for cities
     info_list = [
     {'name': 'Bata', 'lat': 1.87, 'lon': 9.77},
@@ -167,7 +167,7 @@ def main():
     #make list of city objects
     cities = []
     for info in info_list:
-        temp_city = City(info['name'], info['lat'], info['lon'], date_length)
+        temp_city = City(info['name'], info['lat'], info['lon'], date_length, level)
         cities.append(temp_city)
     
     #collect urls and city identifiers
