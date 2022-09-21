@@ -1,3 +1,0 @@
-next steps:
-1. reorganize df (julia)
-2. get rid of warning message about rgb stuff

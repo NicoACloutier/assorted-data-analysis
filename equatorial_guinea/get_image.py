@@ -73,6 +73,7 @@ def get_values(identifier, cities, i, url, dates):
     return all_values
 
 def main():
+    start = time.time()
     
     #make a string of a number, and add 0 to the beginning if 1-digit
     def add_zero(number):
@@ -178,11 +179,16 @@ def main():
     input_data = []
     for identifier in identifiers:
         for i, url in enumerate(all_urls[identifier]):
-            input_data.append([identifier, cities, i, url, dates])
+            input_data.append([identifier, identifiers[identifier], i, url, dates])
     
-    #all_values = [get_values(input[0], input[1], input[3], input[4], input[5]) for input in input_data]
+    end = time.time()
+    print(f'Finished initialization in {end-start:.3f} seconds.')
+    
+    start = time.time()
     with Pool() as pool:
         all_values = pool.starmap(get_values, input_data) #get data
+    end = time.time()
+    print(f'Finished data collection in {end-start:.3f} seconds.')
     
     all_values = squish(all_values) #turn matrix into vector
     all_values = [[item['name'], item['date'], item['value']] for item in all_values] #put values in list
