@@ -66,8 +66,8 @@ def get_values(identifier, cities, i, url, dates):
         lon = city.lons[i] #get longitude (column) position
         value = pix_val[lat][lon] #get pixel brightness value
         temp_dict = {'name': city.name,
-                    'date': date,
-                    'value': value}
+                     'date': date,
+                     'value': value}
         all_values.append(temp_dict)
     os.remove(name) #remove file from computer
     return all_values
