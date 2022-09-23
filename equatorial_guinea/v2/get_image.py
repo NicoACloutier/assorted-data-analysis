@@ -30,12 +30,12 @@ class City:
         max_lon = ((((col+1) * 288) / (2 ** level)) - 180) - 0.01
         
         #get the differences between minima and maxima for latitude and longitude
-        lat_dif = 512 / (max_lat - min_lat)
-        lon_dif = 512 / (max_lon - min_lon)
+        lat_dif = max_lat - min_lat
+        lon_dif = max_lon - min_lon
         
         #get approximate pixel point from the bottom/left
-        lat_pos = lat_dif * (lat - min_lat)
-        lon_pos = lon_dif * (lon - min_lon)
+        lat_pos = (lat - min_lat) // 512
+        lon_pos = (lon - min_lon) // 512
         
         return (lat_pos, lon_pos)
     
@@ -44,8 +44,8 @@ class City:
         lats = []
         lons = []
         for _ in range(date_length):
-            lat_rand = numpy.random.normal(0.0, 1.0) #generate random numbers (normal dist), center 0, standard dev 5
-            lon_rand = numpy.random.normal(0.0, 1.0) #generate random numbers (normal dist), center 0, standard dev 5
+            lat_rand = numpy.random.normal(0.0, 5.0) #generate random numbers (normal dist), center 0, standard dev 5
+            lon_rand = numpy.random.normal(0.0, 5.0) #generate random numbers (normal dist), center 0, standard dev 5
             temp_lat = int(lat_pos) + int(lat_rand) #add random value to latitude
             temp_lon = int(lon_pos) + int(lon_rand) #add random value to longitude
             lats.append(temp_lat) #append to latitudes
