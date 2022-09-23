@@ -24,12 +24,14 @@ class City:
     #get city position within tile
     def get_pos(self, row, col, lat, lon, level):
         #find the minimum and maximum latitudes and longitudes that go on the same tile
-        min_lat = -((row * 288) / (2 ** level)) + 90
-        min_lon = ((col * 288) / (2 ** level)) - 180
-        max_lat = (-(((row+1) * 288) / (2 ** level)) + 90) - 0.01
-        max_lon = ((((col+1) * 288) / (2 ** level)) - 180) - 0.01
+        min_lat = -((row * 288) / (2 ** level)) + 90 #find the minimum latitude for the tile, just algebra from above get_tile equation
+        min_lon = ((col * 288) / (2 ** level)) - 180 #same as above but for longitude
+        max_lat = (-(((row+1) * 288) / (2 ** level)) + 90) - 0.01 #find the minimum longitude for the next tile up, then subtract 0.01
+        max_lon = ((((col+1) * 288) / (2 ** level)) - 180) - 0.01 #same as above, but for latitude
         
-        #get the differences between minima and maxima for latitude and longitude
+        #get the conversion factors from latitude/longitude to pixel position
+        #(it's just 512 (the number of pixels per axis in a 512x512 image) 
+        # divided by the latitude/longitude covered by the image (maximum latitude/longitude - minimum latitude/longitude))
         lat_dif = 512 / (max_lat - min_lat)
         lon_dif = 512 / (max_lon - min_lon)
         
