@@ -50,7 +50,7 @@ def main():
     df = pd.concat([public_df, private_df])
     
     #write to csv
-    df.to_csv('publicschools.csv', index=False)
+    df.to_csv('schools.csv', index=False)
 
 if __name__ == '__main__':
     main()
