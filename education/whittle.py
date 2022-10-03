@@ -1,6 +1,9 @@
 def main():
     import pandas as pd
     
+    #consolidate basic information on latitude/longitude, status on charter/virtual/magnet/private,
+    #demographics (gender/race), and percent of students that receive free or reduced price lunch
+    
     #set a column in a df with all the same value
     def set_values(df, column, value):
         length = len(df)
