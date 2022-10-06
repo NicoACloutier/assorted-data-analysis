@@ -1,6 +1,8 @@
 def main():
     import os
     
+    #convert raw txt files to csv
+    
     num_files = 6
     lowest = 16
     basic = 'filesenr'
