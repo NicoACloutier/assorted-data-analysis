@@ -10,17 +10,18 @@ races = range(1, 7) #races in dataset (numbered 1-7)
 
 basic = "raw\\demographics\\filesenr" #basic file template
 numfiles = 6 #number of files
-lowest = 16 #lowest year (2016)
+lowestfile = 16 #lowest year filename
+lowest = 2016 #lowest year
 
 df = DataFrame(CDSCode=[], Year=[], 
 			   M1=[], M2=[], M3=[], M4=[], M5=[], M6=[], M7=[], 
 			   F1=[], F2=[], F3=[], F4=[], F5=[], F6=[], F7=[]) #dataframe with columns corresponding to gender/race pairs
 
 for i in range(0, numfiles-1)
-	file = "$(basic)$(lowest+i).csv" #filename
+	file = "$(basic)$(lowestfile+i).csv" #filename
 	tempdf = DataFrame(CSV.File(file)) #open file
 	for id in schoolids
-		school = Dict("CDSCode" => id, "Year" => lowest+i) #make dict with CDS code and year
+		school = Dict{Any, Any}("CDSCode" => id, "Year" => lowest+i) #make dict with CDS code and year
 		moretempdf = filter(row -> row.CDS_CODE == id, tempdf) #filter to only include data from one school
 		allsum = sum(collect(moretempdf[:, "ENR_TOTAL"])) #get total sum
 		for race in races
