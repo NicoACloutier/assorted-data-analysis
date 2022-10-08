@@ -64,10 +64,8 @@ def main():
 
     #function to make any data either Y or N
     def binary_func(x):
-        if x == 'No Data':
-            x = 'N'
-        if x != 'N':
-            x = 'Y'
+        if x == 'No Data' or x == None: x = 'N'
+        if x != 'N': x = 'Y'
         return x
     
     #whittle down a df to rows where a particular column has a particular value
