@@ -9,6 +9,7 @@ def get_single_wanted(first_df, second_df, first_axis, second_axis, wanted_axis,
     temp_df = temp_df[temp_df[other_axis] == line[other_axis]]
     value_list = list(temp_df[wanted_axis])
     value = value_list[0] if len(value_list) > 0 else None
+    value = None if value == "*" else value
     return value
 
 def main():
@@ -39,13 +40,14 @@ def main():
         return first_df
     
     #consolidate information from various years from basic suffix
-    def consolidate(basic, years, suffix, lowest):
+    def consolidate(basic, years, suffix, lowest, disclude):
         df = pd.DataFrame()
         for year in range(years):
-            temp_df = pd.read_csv(f'{basic}{lowest+year}{suffix}.csv')
-            length = len(temp_df.index)
-            temp_df['Year'] = [int(f'20{lowest+year}') for _ in range(length)]
-            df = pd.concat([df, temp_df])
+            if lowest+year not in disclude:
+                temp_df = pd.read_csv(f'{basic}{lowest+year}{suffix}.csv')
+                length = len(temp_df.index)
+                temp_df['Year'] = [int(f'20{lowest+year}') for _ in range(length)]
+                df = pd.concat([df, temp_df])
         return df
     
     #get a vector from a matrix
@@ -111,24 +113,23 @@ def main():
             "6": "-African American",
             "7": "-White"}
     
-    public_df = make_df('raw\\pubschls.csv', {'StatusType': 'Active',
-                                              'EILName': 'High School'}, 
-                        ['CDSCode', 'County', 'District', 
-                         'School', 'City', 'Virtual', 'Charter',
-                         'Magnet', 'Latitude', 'Longitude'], {'Public Yes/No': 'Y'}, ['Virtual', 'Magnet', 'Charter'], [], [])
+    df = make_df('raw\\pubschls.csv', {'StatusType': 'Active',
+                                       'EILName': 'High School'}, 
+                ['CDSCode', 'County', 'District', 
+                 'School', 'City', 'Virtual', 'Charter',
+                 'Magnet', 'Latitude', 'Longitude'], dict(), ['Virtual', 'Magnet', 'Charter'], [], [])
     
-    private_df = make_df('raw\\prvschls.csv', {'Entity Type': 'High Schools (Private)'}, 
-                        ['Public Yes/No', 'County', 'District', 'School', 'CDS Code', 'Latitude', 'Longitude'],
-                        {'Charter': 'N', 'Virtual': 'N', 'Magnet': 'N'}, [], ["CDS Code"], ["CDSCode"])
-    
-    df = pd.concat([public_df, private_df])
-    
-    frpm_df = consolidate('raw\\frpm\\frpm', 6, '-cut', 16)
+    frpm_df = consolidate('raw\\frpm\\frpm', 6, '-cut', 16, [])
+    test_df = consolidate('raw\\test\\test', 6, '-cut', 16, [20])
     demo_df = pd.read_csv('raw\\demographics.csv')
     
     df = expand_df(df, [2016, 2017, 2018, 2019, 2020, 2021], 'Year')
     
     df = axis_concat(df, frpm_df, "CDSCode", "School Code", "Percent (%) \nEligible FRPM \n(Ages 5-17)", "Year", "FRPM%")
+    
+    levels = ["Exceeded", "Met", "Met and Above", "Nearly Met", "Not Met"]
+    for level in levels:
+        df = axis_concat(df, test_df, "CDSCode", "School Code", f"Percentage Standard {level}", "Year", f"{level}%")
     
     genders = ['M', 'F']
     races = [i+1 for i in range(7)]
