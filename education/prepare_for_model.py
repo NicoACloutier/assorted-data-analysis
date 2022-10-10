@@ -1,4 +1,5 @@
 #The purpose of this file is to prepare the data consolidated in schools.csv for being used as the training/test data for a model.
+#It will write the final data to for_model.csv.
 
 def main():
     import pandas as pd
@@ -27,7 +28,7 @@ def main():
     #get total percentage for a race or gender
     #(currently, the columns laid out in the format {gender}-{race} where the column
     #has the percentage of people that are both of that gender and that race. This will organize
-    #it into seperate columns for each race and gender.)
+    #it into seperate columns for each race and gender).
     def get_totals(df, race_gender, name):
         totals = []
         columns = [column for column in df.columns.values if (f'{race_gender}-' in column) or (f'-{race_gender}' in column)]
