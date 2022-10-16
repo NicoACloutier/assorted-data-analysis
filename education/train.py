@@ -46,8 +46,8 @@ class Model(nn.Module):
     def __init__(self, input_size, output_size):
         super(Model, self).__init__()
         self.fc1 = nn.Linear(input_size, 100)
-        self.fc2 = nn.Linear(100, 100)
-        self.fc3 = nn.Linear(100, 100)
+        self.fc2 = nn.Linear(100, 1000)
+        self.fc3 = nn.Linear(1000, 100)
         self.fc4 = nn.Linear(100, 100)
         self.fc5 = nn.Linear(100, 100)
         self.fc6 = nn.Linear(100, output_size)
