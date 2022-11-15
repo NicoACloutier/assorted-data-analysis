@@ -53,17 +53,18 @@ def normalize_df(filename, country, year):
     
 def country_iterate(range, lock):
     global final_df
+    local_df = pd.DataFrame()
     for i in range:
         for year in YEARS:
             url = f'{BASIC}/{i}/{year}/?csv=true'
             filename = url_to_file(url, DIRECTORY, i, year)
             country_df = normalize_df(filename, i, year)
-            lock.acquire()
-            final_df = pd.concat([final_df, country_df])
-            lock.release()
+            local_df = pd.concat([local_df, country_df])
             if filename: os.remove(filename)
             else: break
-    return final_df
+    lock.acquire()
+    final_df = pd.concat([local_df, final_df])
+    lock.release()
 
 def main():
     
