@@ -3,10 +3,13 @@ import requests
 import os
 import re
 from multiprocessing import Pool
+import threading
 
 BASIC = 'https://populationpyramid.net/api/pp'
 DIRECTORY = '.\\countries'
 YEARS = range(1950, 2019)
+NUM_COUNTRIES = 1000
+NUM_THREADS = 10
 final_df = pd.DataFrame()
 
 def url_to_file(url, directory, country, year):
@@ -48,23 +51,40 @@ def normalize_df(filename, country, year):
     else:
         return pd.DataFrame()
     
-def country_iterate(i):
-    for year in YEARS:
-        url = f'{BASIC}/{i}/{year}/?csv=true'
-        filename = url_to_file(url, DIRECTORY, i, year)
-        country_df = normalize_df(filename, i, year)
-        final_df = pd.concat([final_df, country_df])
-        if filename: os.remove(filename)
-        else: break
+def country_iterate(range, lock):
+    global final_df
+    for i in range:
+        for year in YEARS:
+            url = f'{BASIC}/{i}/{year}/?csv=true'
+            filename = url_to_file(url, DIRECTORY, i, year)
+            country_df = normalize_df(filename, i, year)
+            lock.acquire()
+            final_df = pd.concat([final_df, country_df])
+            lock.release()
+            if filename: os.remove(filename)
+            else: break
+    return final_df
 
 def main():
     
     #TODO: speed up
+    threads = []
+    lock = threading.Lock()
+    for x in range(NUM_THREADS):
+        begin = NUM_COUNTRIES * x // NUM_THREADS
+        end = NUM_COUNTRIES * (x+1) // NUM_THREADS
+        thread = threading.Thread(target=country_iterate, args=(range(begin, end), lock))
+        thread.start()
+        threads.append(thread)
     
-    with Pool() as pool:
-        pool.map(get_country_file, range(4, 1000))
-   
-    final_df.to_csv(f'{DIRECTORY}\\countries.csv')
+    for thread in threads:
+        thread.join()
+    
+    #with Pool() as pool:
+    #    final_dfs = pool.starmap(country_iterate, inputs)
+    
+    #final_df = pd.concat(final_dfs)
+    final_df.to_csv(f'{DIRECTORY}\\countries.csv', index=False)
 
 if __name__ == '__main__':
     main()
