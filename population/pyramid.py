@@ -15,7 +15,15 @@ NUM_COUNTRIES = 1000
 NUM_THREADS = 10
 final_df = pd.DataFrame()
 
-get_name = lambda id, df: df[df['LocID'] == id]['Location'].item() #get country name from id and df with ids and names
+#get country name from id and df with ids and names
+def get_name(id, df):
+    df = df[df['LocID'] == id]['Location']
+    if len(df) != 0:
+        return df.item() 
+    else:
+        return id
+
+#get_name = lambda id, df: df[df['LocID'] == id]['Location'].item() #get country name from id and df with ids and names
 
 def url_to_file(url, directory, country, year):
     file = requests.get(url)
