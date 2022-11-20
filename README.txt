@@ -1,1 +1,1 @@
-Analyses of assorted datasets using data science and statistics techniques. A short presentation about the purpose, methodology, and findings of each analysis is located in each folder under the title RESULTS.ipynb.
+Analyses of assorted datasets using data science and statistics techniques. A short presentation about the purpose, methodology, and findings of each analysis is located in each folder under the title RESULTS.ipynb. Projects that do not contain a file entitled RESULTS.ipynb are unfinished.
