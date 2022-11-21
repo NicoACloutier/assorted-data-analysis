@@ -23,8 +23,6 @@ def get_name(id, df):
     else:
         return id
 
-#get_name = lambda id, df: df[df['LocID'] == id]['Location'].item() #get country name from id and df with ids and names
-
 def url_to_file(url, directory, country, year):
     file = requests.get(url)
     
@@ -96,7 +94,7 @@ def main():
     for thread in threads:
         thread.join()
     
-    final_df.to_csv(f'{DIRECTORY}\\countries.csv', index=False)
+    final_df.to_csv(f'{DIRECTORY}\\population.csv', index=False)
 
 if __name__ == '__main__':
     main()
