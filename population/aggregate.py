@@ -1,6 +1,9 @@
 import pandas as pd
 import random
 
+#This script aggregates the population data as well as all of the economic indicators into one file,
+#organized by country and year.
+
 BASIC = '.\\countries'
 
 def main():
@@ -34,7 +37,15 @@ def main():
             indicator_list.append(value)
         df[indicator] = indicator_list
     
-    df.to_csv(f'{BASIC}\\aggregated.csv', index=False)
+    df = df.dropna()
+    df = df.sample(frac=1)
+    del df['Country']
+    del df['Year']
+    test = df.sample(frac=0.1)
+    df = df.drop(test.index)
+    
+    test.to_csv(f'{BASIC}\\aggregated_test.csv', index=False)
+    df.to_csv(f'{BASIC}\\aggregated_train.csv', index=False)
 
 if __name__ == '__main__':
     main()
