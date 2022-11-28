@@ -106,7 +106,6 @@ struct LinearRegressor fit(double **x, double **y, int x_vars, int y_vars, int n
 	struct LinearRegressor regressor;
 	regressor.n = n;
 	regressor.coefs = coefs(x, y, x_vars, y_vars, n);
-	printf("hello");
 	
 	double *x_means = malloc(sizeof(double) * x_vars);
 	for (int i = 0; i < x_vars; i++) {
