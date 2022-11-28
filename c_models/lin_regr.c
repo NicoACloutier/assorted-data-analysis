@@ -94,11 +94,11 @@ double *constants(double *x_means, double *y_means, int x_vars, int y_vars, doub
 	
 
 //make a prediction from a linear model
-double *predict(double *inputs, int length, struct LinearRegressor regressor) {
+double *predict(double *inputs, struct LinearRegressor regressor) {
 	double *predictions = malloc(sizeof(double) * regressor.y_vars);
 	for (int i = 0; i < regressor.y_vars; i++){
 		double sum = 0;
-		for (int j = 0; j < length; j++) {
+		for (int j = 0; j < regressor.x_vars; j++) {
 			sum += inputs[j] * regressor.coefs[i][j];
 		}
 		predictions[i] = sum;
