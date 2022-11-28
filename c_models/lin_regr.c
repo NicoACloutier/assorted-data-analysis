@@ -98,8 +98,8 @@ double *predict(double *inputs, int length, struct LinearRegressor regressor) {
 	double *predictions = malloc(sizeof(double) * regressor.y_vars);
 	for (int i = 0; i < regressor.y_vars; i++){
 		double sum = 0;
-		for (int i = 0; i < length; i++) {
-			sum += inputs[i] * regressor.coefs[i];
+		for (int j = 0; j < length; j++) {
+			sum += inputs[j] * regressor.coefs[i][j];
 		}
 		predictions[i] = sum;
 	}
