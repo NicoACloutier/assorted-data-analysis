@@ -5,10 +5,10 @@
 //LINEAR REGRESSION
 
 struct LinearRegressor {
-	int x_vars;
-	int y_vars;
-	double **coefs;
-	double *constants;
+	int x_vars; //number of input dimensions
+	int y_vars; //number of output dimensions
+	double **coefs; //coefficients, columns are input dimensions, rows are output dimensions
+	double *constants; //constants added to each output dimension
 };
 
 //find the arithmetic mean of a vector
