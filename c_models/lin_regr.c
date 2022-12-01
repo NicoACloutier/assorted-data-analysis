@@ -52,6 +52,8 @@ double **coefs(double **x, double **y, int x_vars, int y_vars, int n) {
 			temp_coefs[j] = temp_coef;
 		}
 		coefs[i] = temp_coefs;
+		free(temp_y);
+		free(temp_coefs);
 	}
 	return coefs;
 }
@@ -89,6 +91,7 @@ double *constants(double *x_means, double *y_means, int x_vars, int y_vars, doub
 		double temp_constant = constant(x_means, y_mean, temp_coefs, x_vars);
 		constants[i] = temp_constant;
 	}
+	
 	return constants;
 }
 	
@@ -124,6 +127,8 @@ struct LinearRegressor fit(double **x, double **y, int x_vars, int y_vars, int n
 	}
 	
 	regressor.constants = constants(x_means, y_means, x_vars, y_vars, regressor.coefs);
+	free(x_means);
+	free(y_means);
 	
 	return regressor;
 }
