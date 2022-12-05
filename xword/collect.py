@@ -1,14 +1,23 @@
 import pandas as pd
-from selenium import webdriver
+from requests
 import re
 import json
+import threading
 
-#Collect the 
+#Collect the xword data, turn to readable format
 
-WEBDRIVER_DIR = 'C:\\Users\\nicoc\\Documents\\chromedriver'
-REPO_URL = 'https://github.com/doshea/nyt_crosswords'
+REPO_URL = 'https://raw.githubusercontent.com/doshea/nyt_crosswords/master'
+NUM_THREADS = 10
+all_dict = dict()
 
+add_zero = lambda x: f'0{x}' if len(str(x)) == 1 else str(x)
 remove = lambda x: re.sub('^[0-9]+?\. ', '', x) #remove the initial numbers
+
+#join two dictionaries
+def join(dict1, dict2):
+    for key in dict2:
+        dict1[key] = dict2[key]
+    return dict1
 
 #parse an xword json in a particular direction
 def parse(json_dict, direction):
@@ -20,11 +29,53 @@ def parse(json_dict, direction):
         answer_dict[clue] = answers[i]
     return answer_dict
 
-def main():
-    driver = webdriver.Chrome(executable_path=WEBDRIVER_DIR)
+#collect answer and clue data from urls
+def collect(urls, lock):
+    global all_dict
+    local_all_dict = dict()
     
-    driver.get(REPO_URL)
-    driver.quit()
+    for url in urls:
+        try:
+            raw = requests.get(url).content
+            json_dict = json.loads(raw)
+            answer_dict = join(parse(json_dict, 'across'), parse(json_dict, 'down'))
+            local_all_dict = join(answer_dict, local_all_dict)
+            driver.quit()
+        except Exception:
+            pass
+    
+    lock.acquire()
+    all_dict = join(local_all_dict, all_dict)
+    lock.release()
+    
+
+def main():
+    lock= threading.Lock()
+    all_dict = dict()
+    
+    urls = []
+    for year in range(1976, 2018):
+        for month in range(1, 13):
+            for day in range(1, 32):
+                urls.append(f'{REPO_URL}/{year}/{add_zero(month)}/{add_zero(day)}.json')
+    
+    num_urls = len(urls)
+    threads = []
+    for x in range(NUM_THREADS):
+        begin = num_urls * x // NUM_THREADS #the beginning country id for this thread
+        end = num_urls * (x+1) // NUM_THREADS #the ending country id for this thread
+        thread = threading.Thread(target=collect, args=(range(begin, end), lock))
+        thread.start()
+        threads.append(thread)
+    
+    for thread in threads:
+        thread.join()
+    
+    df = pd.DataFrame()
+    df['Clue'] = all_dict.keys()
+    df['Answer'] = all_dict.values()
+    
+    df.to_csv('.\\data\\xword.csv', index=False)
 
 if __name__ == '__main__':
     main()
