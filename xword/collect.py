@@ -62,8 +62,8 @@ def main():
     num_urls = len(urls)
     threads = []
     for x in range(NUM_THREADS):
-        begin = num_urls * x // NUM_THREADS #the beginning country id for this thread
-        end = num_urls * (x+1) // NUM_THREADS #the ending country id for this thread
+        begin = num_urls * x // NUM_THREADS #the beginning url index for this thread
+        end = num_urls * (x+1) // NUM_THREADS #the endind url index for this thread
         thread = threading.Thread(target=collect, args=(range(begin, end), lock))
         thread.start()
         threads.append(thread)
