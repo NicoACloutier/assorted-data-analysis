@@ -1,5 +1,5 @@
 import pandas as pd
-from requests
+import requests
 import re
 import json
 import threading
@@ -7,7 +7,7 @@ import threading
 #Collect the xword data, turn to readable format
 
 REPO_URL = 'https://raw.githubusercontent.com/doshea/nyt_crosswords/master'
-NUM_THREADS = 10
+NUM_THREADS = 5
 all_dict = dict()
 
 add_zero = lambda x: f'0{x}' if len(str(x)) == 1 else str(x)
@@ -30,19 +30,22 @@ def parse(json_dict, direction):
     return answer_dict
 
 #collect answer and clue data from urls
-def collect(urls, lock):
+def collect(urls, lock, number):
     global all_dict
     local_all_dict = dict()
     
-    for url in urls:
+    for i, url in enumerate(urls):
+        if (i+1) % 100 == 0:
+            print(f'Thread number {number+1} reached iteration {i+1}.')
+            
         try:
             raw = requests.get(url).content
             json_dict = json.loads(raw)
-            answer_dict = join(parse(json_dict, 'across'), parse(json_dict, 'down'))
-            local_all_dict = join(answer_dict, local_all_dict)
-            driver.quit()
         except Exception:
-            pass
+            continue
+        
+        answer_dict = join(parse(json_dict, 'across'), parse(json_dict, 'down'))
+        local_all_dict = join(answer_dict, local_all_dict)
     
     lock.acquire()
     all_dict = join(local_all_dict, all_dict)
@@ -50,8 +53,8 @@ def collect(urls, lock):
     
 
 def main():
-    lock= threading.Lock()
-    all_dict = dict()
+    global all_dict
+    lock = threading.Lock()
     
     urls = []
     for year in range(1976, 2018):
@@ -59,12 +62,15 @@ def main():
             for day in range(1, 32):
                 urls.append(f'{REPO_URL}/{year}/{add_zero(month)}/{add_zero(day)}.json')
     
+    urls = [urls[0]]
+    collect(urls, 0, 0)
+    
     num_urls = len(urls)
     threads = []
     for x in range(NUM_THREADS):
         begin = num_urls * x // NUM_THREADS #the beginning url index for this thread
         end = num_urls * (x+1) // NUM_THREADS #the endind url index for this thread
-        thread = threading.Thread(target=collect, args=(range(begin, end), lock))
+        thread = threading.Thread(target=collect, args=(urls[begin:end], lock, x))
         thread.start()
         threads.append(thread)
     
