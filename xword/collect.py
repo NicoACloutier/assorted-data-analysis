@@ -62,9 +62,6 @@ def main():
             for day in range(1, 32):
                 urls.append(f'{REPO_URL}/{year}/{add_zero(month)}/{add_zero(day)}.json')
     
-    urls = [urls[0]]
-    collect(urls, 0, 0)
-    
     num_urls = len(urls)
     threads = []
     for x in range(NUM_THREADS):
@@ -79,6 +76,7 @@ def main():
     
     df = pd.DataFrame()
     df['Clue'] = all_dict.keys()
+    df['Length'] = [len(item) for item in all_dict.values()]
     df['Answer'] = all_dict.values()
     
     df.to_csv('.\\data\\xword.csv', index=False)
