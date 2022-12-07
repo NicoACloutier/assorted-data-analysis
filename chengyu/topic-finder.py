@@ -1,6 +1,7 @@
+import pandas as pd
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+
 def main():
-    import pandas as pd
-    from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
     
     chengyu_df = pd.read_csv('all-sentences.csv')
     del chengyu_df['Unnamed: 0']
@@ -18,7 +19,7 @@ def main():
             classified.append('None')
     chengyu_df['classified'] = classified
     
-    chengyu_df.to_csv('all-sentences.csv')
+    chengyu_df.to_csv('data\\all-sentences.csv')
 
 if __name__ == '__main__':
     main()

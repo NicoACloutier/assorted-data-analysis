@@ -1,14 +1,15 @@
-def main():
-    import pandas as pd
-    import re
-    from pypinyin import pinyin
+import pandas as pd
+import re
+from pypinyin import pinyin
 
-    chengyu = pd.read_csv('chengyu-appearances.csv') #get appearing chengyu
+def main():
+
+    chengyu = pd.read_csv('data\\chengyu-appearances.csv') #get appearing chengyu
     del chengyu['Column1'] #delete unnecessary column
     appearing_idioms = chengyu['Chengyu'].to_list() #write series of chengyu to list
     
     #create meaning dictionary
-    filename = 'ankideck-raw.txt' #file with chengyu and definitions on it
+    filename = 'data\\ankideck-raw.txt' #file with chengyu and definitions on it
     file = open(filename, 'r', encoding='utf8') #open file
     raw_text = file.read() #extract text
     file.close() #close file
@@ -60,7 +61,7 @@ def main():
     
     #get english definitions
     definitions = []
-    english = pd.read_csv('en-definitions.csv') #read translated csv
+    english = pd.read_csv('data\\en-definitions.csv') #read translated csv
     en_chengyu = english['Chengyu'].to_list() #get chengyu
     en_defs = english['Definition'].to_list() #get definitions
     en_dict = dict(zip(en_chengyu, en_defs)) #make dictionary
@@ -72,7 +73,7 @@ def main():
     
     #get english explanations
     explanations = []
-    english = pd.read_csv('en-explanations.csv') #read translated csv
+    english = pd.read_csv('data\\en-explanations.csv') #read translated csv
     en_chengyu = english['Chengyu'].to_list() #get chengyu
     en_explain = english['Explanation'].to_list() #get explanations
     en_dict = dict(zip(en_chengyu, en_explain)) #make dictionary
@@ -84,7 +85,7 @@ def main():
     
     #get an example sentence for each chengyu
     examples = []
-    text_df = pd.read_csv('train.csv', encoding='utf8') #read text csv
+    text_df = pd.read_csv('data\\train.csv', encoding='utf8') #read text csv
     texts = text_df['content'].to_list() #get sentence list
     texts = ' '.join(texts) #add to one text
     for idiom in appearing_idioms:
@@ -94,7 +95,7 @@ def main():
         examples.append(example) #append
     chengyu['Example'] = examples #add example sentence column to dataframe
     
-    chengyu.to_csv('Chengyu-Final.csv') #write final dataframe to csv
+    chengyu.to_csv('data\\Chengyu-Final.csv') #write final dataframe to csv
 
 if __name__ == '__main__':
     main()

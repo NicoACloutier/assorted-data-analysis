@@ -21,7 +21,7 @@ def translate_text(target, text):
     return [item["translatedText"] for item in result]
 
 def main():
-    cy_df = pd.read_csv("Chengyu-Final.csv")
+    cy_df = pd.read_csv("data\\Chengyu-Final.csv")
     chengyu = cy_df["Chengyu"].to_list()
     definitions = cy_df["Definition"].to_list()
     low_length = int(len(definitions)/20)
@@ -30,7 +30,7 @@ def main():
     english_definitions = translate_text("en", definitions)
     output_df = pd.DataFrame([chengyu, english_definitions], ["Chengyu", "Definitions"])
     output_df = output_df.transpose()
-    output_df.to_csv("en-definitions20.csv")
+    output_df.to_csv("data\\en-definitions20.csv")
     
 if __name__ == '__main__':
     main()
