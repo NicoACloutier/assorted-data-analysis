@@ -59,8 +59,7 @@ def main():
     urls = []
     for year in range(1976, 2018):
         for month in range(1, 13):
-            for day in range(1, 32):
-                urls.append(f'{REPO_URL}/{year}/{add_zero(month)}/{add_zero(day)}.json')
+            urls += [f'{REPO_URL}/{year}/{add_zero(month)}/{add_zero(day)}.json' for day in range(1, 32)]
     
     num_urls = len(urls)
     threads = []

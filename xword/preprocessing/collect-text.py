@@ -62,6 +62,7 @@ def main():
     for corpus in corpora:
         all_text += ' ' + collect_corpus(corpus)
     all_text = remove_stopwords(all_text)
+    all_text = all_text.replace(',', '')
     
     words = all_text.split()
     length = len(words)

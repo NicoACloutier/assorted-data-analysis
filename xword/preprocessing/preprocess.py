@@ -30,7 +30,6 @@ def main():
     df['Answer'] = df['Answer'].apply(cutoff)
     
     df['Obscured'] = df['Answer'].apply(lambda x: obscure(x, PROPORTION))
-    df['Length'] = df['Answer'].apply(len)
     
     df.to_csv(f'{DATA_DIR}\\xword-clean.csv', index=False)
 
