@@ -53,7 +53,6 @@ double **coefs(double **x, double **y, int x_vars, int y_vars, int n) {
 		}
 		coefs[i] = temp_coefs;
 		free(temp_y);
-		free(temp_coefs);
 	}
 	return coefs;
 }
@@ -110,7 +109,7 @@ double *predict(double *inputs, struct LinearRegressor regressor) {
 }
 
 //fit linear regressor
-struct LinearRegressor fit(double **x, double **y, int x_vars, int y_vars, int n, bool is_logistic) {
+struct LinearRegressor fit(double **x, double **y, int x_vars, int y_vars, int n) {
 	struct LinearRegressor regressor;
 	regressor.coefs = coefs(x, y, x_vars, y_vars, n);
 	regressor.x_vars = x_vars;
