@@ -8,7 +8,7 @@ import pandas as pd
 #It goes through a list of corpora and gets a list of words with another word that appears in the environment.
 
 PROPORTION = 0.9 #proportion of characters in text obscured
-MAX_LENGTH = 25 #maximum length of answer & clue strings
+MAX_LENGTH = 20 #maximum length of answer & clue strings
 DATA_DIR = '..\\data'
 
 replace_character = lambda char, proportion: char if random.random() >= proportion else '_' #randomly replace character with '_' a certain proportion of the time

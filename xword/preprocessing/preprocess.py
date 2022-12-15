@@ -7,7 +7,7 @@ import random
 #answers and clues are all at most MAX_LENGTH characters long. It also adds a new column
 #that will be an input column for the model with a certain proportion of characters in a string replaced with '_'
 
-MAX_LENGTH = 25 #maximum length of answers/clues
+MAX_LENGTH = 20 #maximum length of answers/clues
 DATA_DIR = '..\\data'
 PROPORTION = 0.9 #proportion of characters in answers that will be obscured
 
