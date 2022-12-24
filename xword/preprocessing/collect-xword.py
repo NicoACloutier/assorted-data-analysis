@@ -75,7 +75,6 @@ def main():
     
     df = pd.DataFrame()
     df['Clue'] = all_dict.keys()
-    df['Length'] = [len(item) for item in all_dict.values()]
     df['Answer'] = all_dict.values()
     
     df.to_csv('..\\data\\xword.csv', index=False)

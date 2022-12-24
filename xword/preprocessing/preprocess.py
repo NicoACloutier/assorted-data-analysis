@@ -5,11 +5,13 @@ import random
 
 #This script removes non-unicode characters, puts the text in lowercase, and makes sure the 
 #answers and clues are all at most MAX_LENGTH characters long. It also adds a new column
-#that will be an input column for the model with a certain proportion of characters in a string replaced with '_'
+#that will be an input column for the model with a certain proportion of characters in a string replaced with '_'.
+#It does this several times, obscuring a different proportion of the data each time.
 
 MAX_LENGTH = 20 #maximum length of answers/clues
 DATA_DIR = '..\\data'
-PROPORTION = 0.9 #proportion of characters in answers that will be obscured
+PROPORTIONS = [0.9, 0.5, 0.25] #proportion of characters in answers that will be obscured
+TIMES_AUGMENTED = 3 #how many times each column should appear in the augmented dataset
 
 cutoff = lambda string: string if len(string) <= MAX_LENGTH else string[:MAX_LENGTH] #cutoff string if greater than max length
 replace_character = lambda char, proportion: char if random.random() >= proportion else '_' #randomly replace character with '_' a certain proportion of the time
@@ -29,7 +31,15 @@ def main():
     df['Clue'] = df['Clue'].apply(cutoff)
     df['Answer'] = df['Answer'].apply(cutoff)
     
-    df['Obscured'] = df['Answer'].apply(lambda x: obscure(x, PROPORTION))
+    #obscure different proportions of the answer
+    dataframes = []
+    for proportion in PROPORTIONS:
+        temp_df = df.copy()
+        temp_df['Obscured'] = temp_df['Answer'].apply(lambda x: obscure(x, proportion))
+        dataframes.append(temp_df)
+    
+    df = pd.concat(dataframes)
+    df = df.sample(frac=1)
     
     df.to_csv(f'{DATA_DIR}\\xword-clean.csv', index=False)
 
