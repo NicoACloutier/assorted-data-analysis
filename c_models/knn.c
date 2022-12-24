@@ -27,11 +27,9 @@ double vector_distance(double *x, double *y, int length) {
 //for this classification
 double *classify(struct KNearestNeighbor model, double *x) {
 	double minimum;
-	double *distance_vector = malloc(model.n * sizeof(double));
 	int minimum_index = 0;
 	for (int i = 0; i < model.n; i++) {
 		double distance = vector_distance(x, model.x[i], model.x_length);
-		distance_vector[i] = distance;
 		if (i == 0) {
 			minimum = distance;
 		}
