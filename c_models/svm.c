@@ -5,8 +5,8 @@
 //SUPPORT VECTOR MACHINE (in progress)
 
 struct SupportVectorMachine {
-	double **coefs;
-	double *constants;
+	double *coefs; //coefficients of the hyperplane with respect to each input variable
+	double constant; //constant added to the hyperplane
 }
 
 //get the dot product of two length-dimensional vectors
@@ -41,4 +41,8 @@ double *normalize(double *vector, int length) {
 	double magnitude = pythagorean(vector, length);
 	vector = scale(vector, length, 1/magnitude);
 	return vector;
+}
+
+struct SupportVectorMachine fit() {
+	
 }
