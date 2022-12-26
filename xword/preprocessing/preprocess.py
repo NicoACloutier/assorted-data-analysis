@@ -41,7 +41,18 @@ def main():
     df = pd.concat(dataframes)
     df = df.sample(frac=1)
     
-    df.to_csv(f'{DATA_DIR}\\xword-clean.csv', index=False)
+    #make two testing splits, each 5% of dataset.
+    #technically, the second will have slightly less than 5%,
+    #because you already dropped 5% of it,
+    #but that's not a huge deal
+    first_test = df.sample(frac=0.05)
+    df = df.drop(first_test.index)
+    second_test = df.sample(frac=0.05)
+    df = df.drop(second_test.index)
+    
+    df.to_csv(f'{DATA_DIR}\\train.csv', index=False)
+    first_test.to_csv(f'{DATA_DIR}\\first_test.csv', index=False)
+    second_test.to_csv(f'{DATA_DIR}\\second_test.csv', index=False)
 
 if __name__ == '__main__':
     main()
