@@ -8,11 +8,22 @@ import functools
 import numpy as np
 
 #This script pretrains the model on raw text data.
+#It can also be easily adapted to do the main training. In order to do that,
+#simply uncomment the number of lines given by the 'UNCOMMENT {number} FOR MAIN TRAINING'
+#comments
 
 MAX_LENGTH = 20
 BATCH_SIZE = 500
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.001
 NUM_EPOCHS = 1
+DATA_PATH = '..\\data\\text.csv'
+MODEL_PATH = '.\\saves\\pretrained.pth'
+
+#UNCOMMENT 3 FOR MAIN TRAINING
+#PRETRAIN_PATH = '.\\saves\\pretrained.pth'
+#DATA_PATH = '..\\data\\train.csv'
+#MODEL_PATH = '..\\saves\\model.pth'
+
 letter_vectors = Word2Vec.load('..\\preprocessing\\word2vec.model') #load word2vec model
 
 fill_out = lambda word, max_length: word + ' ' * (max_length - len(word)) #add spaces until a word is 25 characters long
@@ -112,6 +123,11 @@ def main():
     criterion = nn.MSELoss() 
     optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE) 
     
+    #UNCOMMENT 3 FOR MAIN TRAINING
+    #checkpoint = torch.load(PRETRAIN_PATH)
+    #model.load_state_dict(checkpoint['model_state_dict'])
+    #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    
     for epoch in range(NUM_EPOCHS):
         print(f'\nEPOCH {epoch+1}\n') 
         total_loss = 0 
@@ -148,8 +164,15 @@ def main():
                 elapsed = end - start
                 print(f'Iteration number {i+1}.	Loss: {avg_loss:.3f}.	Time: {secs_to_str(elapsed)}. Validation loss: {avg_valid_loss:.3f}') #report
                 start = time.time() #reset start time
+            
+            if (i+1) % (BATCH_SIZE * 10) == 0:
+                torch.save({'model_state_dict': model.state_dict(),
+                            'optimizer_state_dict': optimizer.state_dict()}, 
+                            MODEL_PATH)
     
-    torch.save(model, 'saves\\pretrained.pt') #save model to local directory
+    torch.save({'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict()}, 
+                MODEL_PATH) #save model to local directory
 
 if __name__ == '__main__':
     main()
