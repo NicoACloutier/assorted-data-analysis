@@ -20,6 +20,16 @@ struct LengthVector {
 	int length; //its length
 };
 
+//find the arithmetic mean of a vector
+double mean(double *vector, int n) {
+	double sum = 0;
+	for (int i = 0; i < n; i++) {
+		sum += vector[i];
+	}
+	double avg = sum / n;
+	return avg;
+}
+
 //find the distance between two vectors using the dot product
 double vector_distance(double *x, double *y, int length) {
 	double sum = 0;
@@ -103,9 +113,8 @@ double most_common(double *vector, int length) {
 	return maximum_value;
 }
 
-//find the closest x-observation in a KNN dataset, return the y-observation
-//for this classification
-double *classify(struct KNearestNeighbor model, double *x) {
+//find the indices of the k-nearest neighbors
+int *find_knearest(struct KNearestNeighbor model, double *x) {
 	double *k_neighbors = malloc(sizeof(double) * model.k); //distances of nearest points
 	int *k_indeces = malloc(sizeof(int) * model.k); //indeces of nearest points
 	double maximum; //maximum distance still within k smallest
@@ -137,6 +146,14 @@ double *classify(struct KNearestNeighbor model, double *x) {
 	}
 	free(k_neighbors);
 	
+	return k_indeces;
+}
+
+//find the closest x-observation in a KNN dataset, return the y-observation
+//for this classification
+double *classify(struct KNearestNeighbor model, double *x) {
+	int *k_indeces = find_knearest(model, x);
+	
 	//find the most common occurence for each output dimension
 	double prediction;
 	int index;
@@ -153,7 +170,33 @@ double *classify(struct KNearestNeighbor model, double *x) {
 		free(occurences);
 	}
 	
-	free(k_neighbors);
+	free(k_indeces);
 	
 	return predictions;
+}
+
+//perform k-nearest regression
+double *regress(struct KNearestNeighbor model, double *x) {
+	int *k_indeces = find_knearest(model, x);
+	
+	//find the most common occurence for each output dimension
+	double prediction;
+	int index;
+	double *predictions = malloc(sizeof(double) * model.y_length);
+	for (int i = 0; i < model.y_length; i++) {
+		double *occurences = malloc(sizeof(double) * model.k);
+		for (int j = 0; j < model.k; j++) {
+			index = k_indeces[j];
+			occurences[j] = model.y[index][i];
+		}
+		prediction = mean(occurences, model.k);
+		predictions[i] = prediction;
+		
+		free(occurences);
+	}
+	
+	free(k_indeces);
+	
+	return predictions;
+	
 }
