@@ -19,10 +19,11 @@ NUM_EPOCHS = 1
 DATA_PATH = '..\\data\\text.csv'
 MODEL_PATH = '.\\saves\\pretrained.pth'
 
-#UNCOMMENT 3 FOR MAIN TRAINING
+#UNCOMMENT 4 FOR MAIN TRAINING
 #PRETRAIN_PATH = '.\\saves\\pretrained.pth'
 #DATA_PATH = '..\\data\\train.csv'
-#MODEL_PATH = '..\\saves\\model.pth'
+#MODEL_PATH = '..\\saves\\'
+#NUM_SPLITS = 7
 
 letter_vectors = Word2Vec.load('..\\preprocessing\\word2vec.model') #load word2vec model
 
@@ -53,11 +54,21 @@ def secs_to_str(seconds_elapsed):
     else:
         return '1 minute'
 
-def main():
+#train a model on a certain split of the data.
+#only give split and num_splits if you are using xvalidation.
+#xvalidation variable is a bool.
+def train(xvalidation, split=None, num_splits=None):
     start = time.time()
     model = nn.Transformer(d_model=10, nhead=5) #initialize transformer model
     df = pd.read_csv('..\\data\\text.csv') #load data
     df = df.astype(str)
+    model_path = MODEL_PATH
+    
+    if xvalidation:
+        jump = len(df) // num_splits
+        dropped_indeces = range(jump*split, jump*(split+1))
+        df = df.drop(dropped_indeces)
+        model_path = f'{MODEL_PATH}{split}.pth'
     
     #remove characters not in the word2vec model
     text = ''.join(list(df['Clue'])) + ''.join(list(df['Answer']))
@@ -168,11 +179,19 @@ def main():
             if (i+1) % (BATCH_SIZE * 10) == 0:
                 torch.save({'model_state_dict': model.state_dict(),
                             'optimizer_state_dict': optimizer.state_dict()}, 
-                            MODEL_PATH)
+                            model_path)
     
     torch.save({'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict()}, 
-                MODEL_PATH) #save model to local directory
+                model_path) #save model to local directory
+
+def main():
+    #COMMENT 1 FOR MAIN TRAINING
+    train(xvalidation=False)
+    
+    #UNCOMMENT 2 FOR MAIN TRAINING
+    #for split in range(NUM_SPLITS):
+    #    train(xvalidation=True, split, NUM_SPLITS)
 
 if __name__ == '__main__':
     main()
