@@ -2,7 +2,7 @@
 #include<math.h>
 #include<stdlib.h>
 
-//GAUSSIAN NAÏVE BAYES CLASSIFIER
+//GAUSSIAN NAÏVE BAYES CLASSIFIER (unfinished)
 
 struct Gaussian {
 	double mean;
