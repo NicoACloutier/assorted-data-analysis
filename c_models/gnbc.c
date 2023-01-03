@@ -6,8 +6,6 @@
 
 #define ROOT_TWO_PI 2.506628274 //define the constant sqrt(2*pi)
 
-struct MultipleGaussian;
-
 //a univariate Gaussian distribution
 struct Gaussian {
 	double mean; //the mean
@@ -16,7 +14,7 @@ struct Gaussian {
 
 //a multivariate Gaussian distribution
 struct MultipleGaussian {
-	int dimensions; //the number of dimensions
+	int dimensions; //the number of dimensions in the distribution
 	struct Gaussian *gaussians; //an array of univariate Gaussians
 };
 
@@ -36,14 +34,20 @@ double overall_probability(double *vector, int length) {
 	return probability;
 }
 
+//raise Euler's constant to a power
+double exp(double power) {
+	return pow(M_E, power);
+}
+
 //get the probability of an x coordinate in a univariate Gaussian
 double get_probability(struct Gaussian distribution, double x) {
 	
-	double normalized_square_distance = pow((x - distribution.mean), 2);
-	normalized_square_distance /= pow(distribution.std_dev, 2);
+	double normalized_square_distance = (x - distribution.mean);
+	normalized_square_distance /= distribution.std_dev;
+	normalized_square_distance = pow(normalized_square_distance, 2);
 	
 	double answer = 1 / (distribution.std_dev * ROOT_TWO_PI);
-	answer *= pow(M_E, -0.5 * normalized_square_distance);
+	answer *= exp(-0.5 * normalized_square_distance);
 	
 	return answer;
 }
@@ -63,8 +67,8 @@ double *get_probabilities(struct MultipleGaussian distributions, double *x) {
 
 //predict which class it falls under
 int predict(struct GaussianNaiveBayes model, double *x) {
-	int minimum_index;
-	double minimum_probability;
+	int maximum_index;
+	double maximum_probability;
 	double *temp_vector;
 	double temp_probability;
 	struct MultipleGaussian distributions;
@@ -75,15 +79,17 @@ int predict(struct GaussianNaiveBayes model, double *x) {
 		temp_probability = overall_probability(temp_vector, model.dimensions);
 		free(temp_vector);
 		
-		if (i == 0 || temp_probability < minimum_probability) {
-			minimum_index = i;
-			minimum_probability = temp_probability;
+		if (i == 0 || temp_probability > maximum_probability) {
+			maximum_index = i;
+			maximum_probability = temp_probability;
 		}
 	}
 	
-	return minimum_index;
+	return maximum_index;
 }
 
+//fit arrays of means and standard deviations given a number of distributions and
+//dimensions of those distributions to a Gaussian Naive Bayes classification model
 struct GaussianNaiveBayes fit(double **means, double **std_devs, 
 							  int dimensions, int number_distributions) {
 	struct GaussianNaiveBayes model;
