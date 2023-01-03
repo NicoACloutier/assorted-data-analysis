@@ -2,7 +2,7 @@
 #include<math.h>
 #include<stdlib.h>
 
-//GAUSSIAN NAÏVE BAYES CLASSIFIER (unfinished)
+//GAUSSIAN NAÏVE BAYES CLASSIFIER
 
 #define ROOT_TWO_PI 2.506628274 //define the constant sqrt(2*pi)
 
