@@ -118,17 +118,14 @@ int *find_knearest(struct KNearestNeighbor model, double *x) {
 	double *k_neighbors = malloc(sizeof(double) * model.k); //distances of nearest points
 	int *k_indeces = malloc(sizeof(int) * model.k); //indeces of nearest points
 	double maximum; //maximum distance still within k smallest
-	int maximum_index = 0;
+	int maximum_index;
 	
 	//initialize k_neighbors and k_indeces
 	for (int i = 0; i < model.k; i++) {
 		double distance = vector_distance(x, model.x[i], model.x_length);
 		k_neighbors[i] = distance;
 		k_indeces[i] = i;
-		if (i == 0) {
-			maximum = distance;
-		}
-		if (distance > maximum) {
+		if (distance > maximum || i == 0) {
 			maximum = distance;
 			maximum_index = i;
 		}
@@ -197,6 +194,5 @@ double *regress(struct KNearestNeighbor model, double *x) {
 	
 	free(k_indeces);
 	
-	return predictions;
-	
+	return predictions;	
 }
