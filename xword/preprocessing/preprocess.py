@@ -10,7 +10,7 @@ import random
 
 MAX_LENGTH = 20 #maximum length of answers/clues
 DATA_DIR = '..\\data'
-PROPORTIONS = [0.9, 0.5, 0.25] #proportion of characters in answers that will be obscured
+PROPORTIONS = [0.8, 0.5, 0.25, 0.1] #proportion of characters in answers that will be obscured
 TIMES_AUGMENTED = 3 #how many times each column should appear in the augmented dataset
 
 cutoff = lambda string: string if len(string) <= MAX_LENGTH else string[:MAX_LENGTH] #cutoff string if greater than max length
@@ -31,6 +31,9 @@ def main():
     df['Clue'] = df['Clue'].apply(cutoff)
     df['Answer'] = df['Answer'].apply(cutoff)
     
+    test_df = df.sample(frac=0.1)
+    df = df.drop(test_df.index)
+    
     #obscure different proportions of the answer
     dataframes = []
     for proportion in PROPORTIONS:
@@ -41,18 +44,17 @@ def main():
     df = pd.concat(dataframes)
     df = df.sample(frac=1)
     
-    #make two testing splits, each 5% of dataset.
-    #technically, the second will have slightly less than 5%,
-    #because you already dropped 5% of it,
-    #but that's not a huge deal
-    first_test = df.sample(frac=0.05)
-    df = df.drop(first_test.index)
-    second_test = df.sample(frac=0.05)
-    df = df.drop(second_test.index)
+    test_dataframes = []
+    for proportion in PROPORTIONS:
+        temp_df = test_df.copy()
+        temp_df['Obscured'] = temp_df['Answer'].apply(lambda x: obscure(x, proportion))
+        test_dataframes.append(temp_df)
+    
+    test_df = pd.concat(test_dataframes)
+    test_df = test_df.sample(frac=1)
     
     df.to_csv(f'{DATA_DIR}\\train.csv', index=False)
-    first_test.to_csv(f'{DATA_DIR}\\first_test.csv', index=False)
-    second_test.to_csv(f'{DATA_DIR}\\second_test.csv', index=False)
+    test_df.to_csv(f'{DATA_DIR}\\test.csv', index=False)
 
 if __name__ == '__main__':
     main()
