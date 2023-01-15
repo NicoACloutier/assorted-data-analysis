@@ -14,8 +14,8 @@ using DataFrames
 
 const DATA_DIR = "..\\data\\raw"
 
-const TITLE_SELECTOR = sel".d-flex.justify-content-between.align-items-start"
-const COMPANY_SELECTOR = sel".jobLink.css-1rd3saf.eigr9kq3"
+const COMPANY_SELECTOR = sel".d-flex.justify-content-between.align-items-start"
+const TITLE_SELECTOR = sel".jobLink.css-1rd3saf.eigr9kq3"
 const LOCATION_SELECTOR = sel".d-flex.flex-wrap.css-11d3uq0.e1rrn5ka2" 
 const SALARY_SELECTOR = sel".d-flex.flex-wrap.css-1i7b5bu.e1rrn5ka1"
 
@@ -45,9 +45,9 @@ end
 
 #parse a singular job posting for various pieces of information
 function parse_posting(job_posting)
-	title = get_css(TITLE_SELECTOR, job_posting)
-	title = match(r">(.+)\<", string(title)).captures[1]
 	company = get_css(COMPANY_SELECTOR, job_posting)
+	company = match(r">(.+)\<", string(company)).captures[1]
+	title = get_css(TITLE_SELECTOR, job_posting)
 	location = get_css(LOCATION_SELECTOR, job_posting)
 	
 	try
@@ -72,6 +72,8 @@ function main()
 	for page in pages
 		push!(df, to_array(page))
 	end
+	
+	df = unique(df)
 	
 	CSV.write("$(DATA_DIR)\\raw.csv", df)
 end
