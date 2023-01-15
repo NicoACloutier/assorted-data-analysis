@@ -4,8 +4,9 @@ using Languages
 
 const DATA_DIR = "..\\data\\raw"
 const OUTPUT_DIR = "..\\data\\cleaned"
-const PROPORTION = 0.05
-const PUNCTUATION = [",", ".", "-", "!", "?", ":", ";", "'"]
+const PROPORTION = 0.03 #proportion of job titles the word must appear in
+const HOURS_PER_YEAR = 1800 #number of hours worked in a year for an hourly-payed job (1800 is roughly the US average)
+const PUNCTUATION = [",", ".", "-", "!", "?", ":", ";", "'", "/", "&amp;"]
 
 one_hot(wordlist, all_words) = [Int(in(word, wordlist)) for word in all_words]
 appearances(word, wordlists) = sum([in(word, wordlist) for wordlist in wordlists])
@@ -47,12 +48,53 @@ function find_words(titles)
 	(all_words, titles)
 end
 
+#parse a wage string
+function parse_wage(wage)
+	try
+		captured_wage = match(r"\$([0-9]+?\.[0-9]+?) - \$([0-9]+?\.[0-9]+?) Per Hour", wage).captures
+		low = parse(Float64, captured_wage[1])
+		high = parse(Float64, captured_wage[2])
+		return (high + low) / 2 * 1800
+	catch
+		captured_wage = match(r"\$([0-9]+?\.[0-9]+?) Per Hour", wage).captures
+		wage = parse(Float64, captured_wage[1])
+		return (wage) / 2 * 1800
+	end
+end
+
+#parse a salary string
+function parse_salary(salary)
+	try
+		captured_salary = match(r"\$([0-9]+?)K - \$([0-9]+?)K", salary).captures
+		low = parse(Float64, captured_salary[1])
+		high = parse(Float64, captured_salary[2])
+		return (high + low) / 2 * 1000
+	catch
+		captured_salary = match(r"\$([0-9]+?)K", salary).captures
+		salary = parse(Float64, captured_salary[1])
+		return (salary) / 2 * 1000
+	end
+end
+
+#parse a pay string
+function parse_pay(pay)
+	if ismissing(pay)
+		return missing
+	elseif occursin("Per Hour", pay)
+		return parse_wage(pay)
+	else
+		return parse_salary(pay)
+	end
+end
+
 function main()
 	df = DataFrame(CSV.File("$(DATA_DIR)\\raw.csv"))
 	
+	df[!, "Parsed_Salary"] = map(parse_pay, df[!, "Salary"])
+	
 	(all_words, titles) = find_words(df[!, "Title"])
-	println(titles)
 	title_df = DataFrame(to_dict(all_words, titles))
+	title_df[!, "Salary"] = df[!, "Parsed_Salary"]
 	CSV.write("$(OUTPUT_DIR)\\titles.csv", title_df)
 	
 end
