@@ -28,10 +28,10 @@ double *navigate_nodes(struct Node current_node, double *x, int length) {
 	
 	double current_value = x[current_node.dimension]; //get the value on this node's compare dimension
 	if (current_value > current_node.compare_value) {
-		navigate_nodes(&current_node.greater_pointer, x, length); //navigate to the next greater node if greater
+		navigate_nodes(*current_node.greater_pointer, x, length); //navigate to the next greater node if greater
 	}
 	else {
-		navigate_nodes(&current_node.less_pointer, x, length); //navigate to the next less node if less
+		navigate_nodes(*current_node.less_pointer, x, length); //navigate to the next less node if less
 	}
 }
 
