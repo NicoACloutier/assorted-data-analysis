@@ -54,11 +54,11 @@ function parse_wage(wage)
 		captured_wage = match(r"\$([0-9]+?\.[0-9]+?) - \$([0-9]+?\.[0-9]+?) Per Hour", wage).captures
 		low = parse(Float64, captured_wage[1])
 		high = parse(Float64, captured_wage[2])
-		return (high + low) / 2 * 1800
+		return (high + low) / 2 * HOURS_PER_YEAR
 	catch
 		captured_wage = match(r"\$([0-9]+?\.[0-9]+?) Per Hour", wage).captures
 		wage = parse(Float64, captured_wage[1])
-		return (wage) / 2 * 1800
+		return (wage) / 2 * HOURS_PER_YEAR
 	end
 end
 
@@ -95,7 +95,20 @@ function main()
 	(all_words, titles) = find_words(df[!, "Title"])
 	title_df = DataFrame(to_dict(all_words, titles))
 	title_df[!, "Salary"] = df[!, "Parsed_Salary"]
+	
 	CSV.write("$(OUTPUT_DIR)\\titles.csv", title_df)
+	
+	geography_df = DataFrame()
+	geography_df[!, "Location"] = df[!, "Location"]
+	geography_df[!, "Salary"] = df[!, "Parsed_Salary"]
+	
+	CSV.write("$(OUTPUT_DIR)\\geography.csv", geography_df)
+	
+	company_df = DataFrame()
+	company_df[!, "Company"] = df[!, "Company"]
+	company_df[!, "Salary"] = df[!, "Parsed_Salary"]
+	
+	CSV.write("$(OUTPUT_DIR)\\companies.csv", company_df)
 	
 end
 
