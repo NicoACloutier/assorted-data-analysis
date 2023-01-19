@@ -137,19 +137,19 @@ struct Node *best_fit(struct Node node, struct MaskDataset input, struct MaskDat
 	double temp_mean;
 	double temp_var;
 	
-	double minimum_variance = DBL_MAX;
-	double minimum_mean;
-	int minimum_dimension;
+	double maximum_variance = 0;
+	double maximum_mean;
+	int maximum_dimension;
 	
-	//find the best split (test for minimum variance multiplied by remaining values for each dimension mean as a compare value)
+	//find the best split (test for maximum variance multiplied by remaining values for each dimension mean as a compare value)
 	for (int i = 0; i < input.dimensions; i++) {
 		temp_mean = dimension_mean(input, i);
 		temp_var = find_count_variance(temp_mean, i, input);
 		
-		if (temp_var < minimum_variance) {
-			minimum_variance = temp_var;
-			minimum_mean = temp_mean;
-			minimum_dimension = i;
+		if (temp_var > maximum_variance) {
+			maximum_variance = temp_var;
+			maximum_mean = temp_mean;
+			maximum_dimension = i;
 		}
 	}
 	
@@ -161,11 +161,11 @@ struct Node *best_fit(struct Node node, struct MaskDataset input, struct MaskDat
 	
 	for (int i = 0; i < input.n; i++) {
 		if (input.mask_list) {
-			greater_mask_list[i] = (input.x[i][minimum_dimension]);
-			greater_remaining += (input.x[i][minimum_dimension]);
+			greater_mask_list[i] = (input.x[i][maximum_dimension]);
+			greater_remaining += (input.x[i][maximum_dimension]);
 			
-			less_mask_list[i] = !(input.x[i][minimum_dimension]);
-			less_remaining += !(input.x[i][minimum_dimension]);
+			less_mask_list[i] = !(input.x[i][maximum_dimension]);
+			less_remaining += !(input.x[i][maximum_dimension]);
 		}
 		else {
 			greater_mask_list[i] = 0;
@@ -173,8 +173,8 @@ struct Node *best_fit(struct Node node, struct MaskDataset input, struct MaskDat
 		}
 	}
 	
-	node.dimension = minimum_dimension;
-	node.compare_value = minimum_mean;
+	node.dimension = maximum_dimension;
+	node.compare_value = maximum_mean;
 	
 	//Declare masked datasets
 	
