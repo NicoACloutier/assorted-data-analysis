@@ -95,13 +95,33 @@ double find_count_variance(double compare_value, int dimension, struct MaskedDat
 	return over_var + under_var;
 }
 
+//checks if every unmasked value in a masked dataset is equivalent to every other
+int is_the_same(struct MaskedDataset input) {
+	double **subset = malloc(sizeof(double*) * input.remaining);
+	for (int i = 0; i < input.n; i++) {
+		if (input.mask_list[i]) {subset[i] = input.x[i];}
+	}
+	
+	for (int i = 1; i < input.remaining; i++) {
+		for (int j = 0; j < input.dimensions; j++) {
+			if (subset[i][j] != subset[i-1][j]) {
+				free(subset);
+				return 0;
+				}
+		}
+	}
+	
+	free(subset);
+	return 1;
+}
+
 //fit a particular node. If the number of observations left that fall under that node is greater
 //than the minimum observations previously specified in the fit function, make two new nodes,
 //one if it is greater than a compare value and one if it is less. keep going until the minimum
 //number has been reached. At that point, find the mean y-value on each dimension and put it as the
 //return value on a return node. (These nodes will have a dimension of -1).
 struct Node *best_fit(struct Node node, struct MaskDataset input, struct MaskDataset output) {
-	if (input.remaining <= node.minimum_observations) {
+	if ((input.remaining <= node.minimum_observations) || (is_the_same(input))) {
 		double *output_vector = malloc(sizeof(double) * output.dimensions);
 		for (int i = 0; i < output.dimensions; i++) {
 			output_vector[i] = dimension_mean(output, i);
