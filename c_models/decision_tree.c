@@ -98,8 +98,12 @@ double find_count_variance(double compare_value, int dimension, struct MaskedDat
 //checks if every unmasked value in a masked dataset is equivalent to every other
 int is_the_same(struct MaskedDataset input) {
 	double **subset = malloc(sizeof(double*) * input.remaining);
+	int subset_index = 0;
 	for (int i = 0; i < input.n; i++) {
-		if (input.mask_list[i]) {subset[i] = input.x[i];}
+		if (input.mask_list[i]) {
+			subset[subset_index] = input.x[i];
+			subset_index++;
+		}
 	}
 	
 	for (int i = 1; i < input.remaining; i++) {
@@ -107,7 +111,7 @@ int is_the_same(struct MaskedDataset input) {
 			if (subset[i][j] != subset[i-1][j]) {
 				free(subset);
 				return 0;
-				}
+			}
 		}
 	}
 	
@@ -115,31 +119,35 @@ int is_the_same(struct MaskedDataset input) {
 	return 1;
 }
 
-//fit a particular node. If the number of observations left that fall under that node is greater
-//than the minimum observations previously specified in the fit function, make two new nodes,
-//one if it is greater than a compare value and one if it is less. keep going until the minimum
-//number has been reached. At that point, find the mean y-value on each dimension and put it as the
-//return value on a return node. (These nodes will have a dimension of -1).
-struct Node *best_fit(struct Node node, struct MaskDataset input, struct MaskDataset output) {
-	if ((input.remaining <= node.minimum_observations) || (is_the_same(input))) {
-		double *output_vector = malloc(sizeof(double) * output.dimensions);
-		for (int i = 0; i < output.dimensions; i++) {
-			output_vector[i] = dimension_mean(output, i);
-		}
-		
-		node.dimension = -1;
-		node.return_value = output_vector;
-		free(input.mask_list);
-		free(output.mask_list);
-		return &node;
+//copy the return length and minimum observations of a node to another newly initialized one
+struct Node copy_node(struct Node to_copy) {
+	struct Node return_node;
+	return_node.return_length = to_copy.return_length;
+	return_node.minimum_observations = to_copy.minimum_observations;
+	return return_node;
+}
+
+//find the return vector of a node with an output dataset
+struct Node *get_return_vector(struct Node node, struct MaskedDataset output) {
+	double *output_vector = malloc(sizeof(double) * output.dimensions);
+	for (int i = 0; i < output.dimensions; i++) {
+		output_vector[i] = dimension_mean(output, i);
 	}
 	
+	node.dimension = -1;
+	node.return_value = output_vector;
+	free(output.mask_list);
+	return &node;
+}
+
+//get the dimension of a dataset that has the highest variance
+//(among unmasked values)
+int get_maximum_variance_dimension(struct MaskedDataset input) {
 	double temp_mean;
 	double temp_var;
 	
 	double maximum_variance = 0;
-	double maximum_mean;
-	int maximum_dimension;
+	int maximum_var_dimension;
 	
 	//find the best split (test for maximum variance multiplied by remaining values for each dimension mean as a compare value)
 	for (int i = 0; i < input.dimensions; i++) {
@@ -148,61 +156,67 @@ struct Node *best_fit(struct Node node, struct MaskDataset input, struct MaskDat
 		
 		if (temp_var > maximum_variance) {
 			maximum_variance = temp_var;
-			maximum_mean = temp_mean;
-			maximum_dimension = i;
+			maximum_var_dimension = i;
 		}
 	}
+
+	return maximum_var_dimension;
+}
+
+struct MaskedDataset change_mask_list(struct MaskedDataset input, double compare_value, int greater) {
+	int *mask_list = malloc(sizeof(int) * input.n);
 	
-	int *greater_mask_list = malloc(sizeof(int) * input.n);
-	int *less_mask_list = malloc(sizeof(int) * input.n);
+	struct MaskedDataset return_dataset;
+	return_dataset.n = input.n;
+	return_dataset.x = input.x;
+	return_dataset.dimensions = input.dimensions;
 	
-	int greater_remaining;
-	int less_remaining;
+	int remaining;
+	int is_greater;
 	
 	for (int i = 0; i < input.n; i++) {
 		if (input.mask_list) {
-			greater_mask_list[i] = (input.x[i][maximum_dimension]);
-			greater_remaining += (input.x[i][maximum_dimension]);
-			
-			less_mask_list[i] = !(input.x[i][maximum_dimension]);
-			less_remaining += !(input.x[i][maximum_dimension]);
+			is_greater = (input.x[i][compare_value] > maximum_var_mean);
+			mask_list[i] = (greater) ? is_greater : !is_greater;
+			remaining += (greater) ? is_greater : !is_greater;
 		}
 		else {
-			greater_mask_list[i] = 0;
-			less_mask_list[i] = 0;
+			mask_list[i] = 0;
 		}
 	}
 	
-	node.dimension = maximum_dimension;
-	node.compare_value = maximum_mean;
+	return_dataset.mask_list = mask_list;
+	return_dataset.remaining = remaining;
 	
-	//Declare masked datasets
+	return return_dataset;
+}
+
+//Fit a particular node (get its compare value and dimension).
+//Node should already have specifications for the dimensions of the return vector and the minimum observations for stopping.
+//Recurse until a stopping condition is met,
+//Conditions: a certain number or less of datapoints remain, or all datapoint inputs are equal to each other
+//When a stopping condition is met, get the return vector for the node, and return pointer to it.
+//Overall, function returns a pointer to the first node that contains pointers to the next two, etc.
+struct Node *best_fit(struct Node node, struct MaskedDataset input, struct MaskedDataset output) {
+	if ((input.remaining <= node.minimum_observations) || (is_the_same(input))) {
+		free(input.mask_list);
+		return get_return_vector(node, output); //output mask list gets freed in the function
+	}
 	
-	struct MaskedDataset greater_input = {.mask_list = greater_mask_list, .n = input.n, 
-										  .remaining = greater_remaining, .x = input.x, 
-										  .dimensions = input.dimensions};
+	int maximum_var_dimension = get_maximum_variance_dimension(input);
+	double maximum_var_mean = dimension_mean(input, maximum_var_dimension);
 	
-	struct MaskedDataset less_input = {.mask_list = less_mask_list, .n = input.n, 
-									   .remaining = less_remaining, .x = input.x, 
-									   .dimensions = input.dimensions};
+	node.dimension = maximum_var_dimension;
+	node.compare_value = maximum_var_mean;
 	
-	struct MaskedDataset greater_output = {.mask_list = greater_mask_list, .n = output.n, 
-										   .remaining = greater_remaining, .x = output.x, 
-										   .dimensions = output.dimensions};
+	//Declare masked datasets (the function makes a copy of the dataset with an updated mask list)
+	struct MaskedDataset greater_input = change_mask_list(input, maximum_var_mean, 1);
+	struct MaskedDataset less_input = change_mask_list(input, maximum_var_mean, 0);
+	struct MaskedDataset greater_output = change_mask_list(output, maximum_var_mean, 1);
+	struct MaskedDataset less_output = change_mask_list(output, maximum_var_mean, 0);
 	
-	struct MaskedDataset less_output = {.mask_list = less_mask_list, .n = output.n, 
-										.remaining = less_remaining, .x = output.x, 
-										.dimensions = output.dimensions};
-	
-	struct Node greater_node;
-	greater_node.return_length = node.return_length;
-	greater_node.minimum_observations = node.minimum_observations;
-	node.greater_pointer = best_fit(greater_node, greater_input, greater_output);
-	
-	struct Node less_node;
-	less_node.return_length = node.return_length;
-	less_node.minimum_observations = node.minimum_observations;
-	node.less_pointer = best_fit(less_node, less_input, less_output);
+	node.greater_pointer = best_fit(copy_node(node), greater_input, greater_output);
+	node.less_pointer = best_fit(copy_node(node), less_input, less_output);
 	
 	free(input.mask_list);
 	free(output.mask_list);
@@ -212,6 +226,8 @@ struct Node *best_fit(struct Node node, struct MaskDataset input, struct MaskDat
 //fit a Decision Tree model
 struct DecisionTree fit(double **x, int x_length, double **y, int y_length, 
 						int n, int minimum_observations) {
+	
+	//initialize a mask list where no values are masked
 	int *ones = malloc(sizeof(int) * n);
 	for (int i = 0; i < n; i++) {
 		ones[i] = 1;
