@@ -65,34 +65,23 @@ double *navigate_tree(struct DecisionTree model, double *x, int length) {
 	return navigate_nodes(*model.first_node, x, length);
 }
 
-//return the sum of the variances multiplied by the count of two prospective leaves
+//return the variance of the dataset within a particular dimension
 double find_count_variance(double compare_value, int dimension, struct MaskedDataset input) {
-	int under_count = 0; //number of points over the compare value
-	double under_sum = 0; //sum of all point values in this dimension for points above compare value
-	double under_sqrsum = 0; //sum of square point values of above
+	int count = 0; //number of points
+	double sum = 0; //sum of all point values
+	double sqrsum = 0; //sum of square point values
 	
-	int over_count = 0; //number of points under
-	double over_sum = 0; //the sum of points under in this dimension
-	double under_sqrsum = 0; //sum of square points under in this dimension
 	for (int i = 0; i < input.n; i++) {
 		if (input.mask_list[i]) {
-			if (input.x[i][dimension] > compare_value) {
-				over_count++;
-				over_sum += input.x[i][dimension];
-				over_sqrsum += pow(input.x[i][dimension], 2);
-			}
-			else {
-				under_count++;
-				under_sum += input.x[i][dimension];
-				under_sqrsum += pow(input.x[i][dimension], 2);
-			}
+			count++;
+			sum += input.x[i][dimension];
+			sqrsum += pow(input.x[i][dimension], 2);
 		}
 	}
 	
-	double under_var = (under_sqrsum - (pow(under_sum, 2)/under_count)); //the variance of points under the compare value multiplied by the count
-	double over_var = (over_sqrsum - (pow(over_sum, 2)/over_count)); //the variance of points over the compare value multiplied by the count
+	double variance = (sqrsum - (pow(sum, 2)/count));
 	
-	return over_var + under_var;
+	return variance;
 }
 
 //checks if every unmasked value in a masked dataset is equivalent to every other
