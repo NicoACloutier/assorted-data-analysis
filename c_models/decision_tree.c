@@ -65,21 +65,19 @@ double *navigate_tree(struct DecisionTree model, double *x, int length) {
 	return navigate_nodes(*model.first_node, x, length);
 }
 
-//return the variance of the dataset within a particular dimension
+//return the variance of the dataset within a particular dimension multiplied by the count
 double find_count_variance(double compare_value, int dimension, struct MaskedDataset input) {
-	int count = 0; //number of points
 	double sum = 0; //sum of all point values
 	double sqrsum = 0; //sum of square point values
 	
 	for (int i = 0; i < input.n; i++) {
 		if (input.mask_list[i]) {
-			count++;
 			sum += input.x[i][dimension];
 			sqrsum += pow(input.x[i][dimension], 2);
 		}
 	}
 	
-	double variance = (sqrsum - (pow(sum, 2)/count));
+	double variance = (sqrsum - (pow(sum, 2)/input.remaining));
 	
 	return variance;
 }
