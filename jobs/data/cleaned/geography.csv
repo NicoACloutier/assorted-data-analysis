@@ -1,88 +1,88 @@
-Location,Salary
-"Apple Valley, MN",107000.0
-"Charlotte, NC",112500.0
-"Jackson, MS",118269.0
-"Dallas, TX",77500.0
-"Dallas, TX",109500.0
-"Nashville, TN",65500.0
-"Boston, MA",62500.0
-"Quantico, VA",55000.0
-"Palmdale, CA",238500.0
-"Social Circle, GA",
-"South Burlington, VT",66000.0
-"La Grange, IL",103000.0
-"Englewood, CO",110000.0
-"Mason, OH",133500.0
-"Draper, UT",135000.0
-"Jacksonville, FL",118500.0
-"Irving, TX",130000.0
-"Danvers, MA",97500.0
-"Englewood, CO",50000.0
-"Minneapolis, MN",110000.0
-"Watertown, MA",131000.0
-Wyoming,83500.0
-"Philadelphia, NY",150500.0
-"Santa Clara, CA",244000.0
-"Frederick, MD",140000.0
-"Rockville, MD",75000.0
-"Portland, ME",141500.0
-"Boston, MA",130500.0
-"Dahlgren, VA",
-"Fort Worth, TX",47000.0
-"New York, NY",94000.0
-"Norfolk, VA",75500.0
-"Schoolcraft, MI",90000.0
-"Holliston, MA",68000.0
-"Battle Creek, MI",64000.0
-"Orrville, OH",42500.0
-"Huntsville, AL",86500.0
-"Deer Park, TX",80500.0
-"Canton, OH",25200.0
-"Chicago, IL",42500.0
-Remote,70000.0
-"Somerset, NJ",42500.0
-"Atlanta, GA",74000.0
-"Aberdeen Proving Ground, MD",78500.0
-"Denver, CO",41400.0
-"Chicago, IL",102000.0
-"Rolling Meadows, IL",67000.0
-"Sidney, OH",57000.0
-"Miami, FL",50500.0
-"Aberdeen Proving Ground, MD",108000.0
-"Tempe, AZ",62500.0
-"Rolling Meadows, IL",
-Remote,
-"Cambridge, MD",86000.0
-"Rolling Meadows, IL",68500.0
-"Tempe, AZ",57500.0
-"Rolling Meadows, IL",102500.0
-Manhattan,72000.0
-"Monroe, WI",85000.0
-"Portland, OR",18900.0
-"Denver, CO",94000.0
-"Austin, TX",145000.0
-"Camden, NJ",90500.0
-"Pittsburgh, PA",82500.0
-"Rome, GA",112500.0
-"Malvern, PA",122500.0
-"Boise, ID",122000.0
-"Chandler, AZ",99500.0
-"San Mateo, CA",104000.0
-"New York, NY",185400.0
-"Fort Worth, TX",82500.0
-"Southfield, MI",75500.0
-"Coconut Creek, FL",94500.0
-"Somerville, MA",175000.0
-"Santa Clara, CA",35000.0
-"Rocky Hill, CT",91000.0
-"Rome, GA",112500.0
-"Omaha, NE",50000.0
-"Nashua, NH",
-"La Grange, IL",103000.0
-"Skokie, IL",45000.0
-"Aurora, CO",62500.0
-"San Diego, CA",101000.0
-"Santa Clara, CA",244000.0
-"Englewood, CO",40000.0
-"Austin, TX",102000.0
-"Beachwood, OH",87500.0
+Location,Salary,Date
+"Clearfield, UT",101000.0,2023-01-23
+"Nashville, TN",65500.0,2023-01-23
+"Chantilly, VA",170000.0,2023-01-23
+"Apple Valley, MN",107000.0,2023-01-23
+"Columbus, OH",80000.0,2023-01-23
+"Boston, MA",62500.0,2023-01-23
+"Dallas, TX",78000.0,2023-01-23
+"Huntsville, AL",150000.0,2023-01-23
+"Palmdale, CA",238500.0,2023-01-23
+"Jacksonville, FL",118500.0,2023-01-23
+"Columbia, MD",175000.0,2023-01-23
+"Danvers, MA",98000.0,2023-01-23
+"Englewood, CO",110000.0,2023-01-23
+"Irving, TX",130000.0,2023-01-23
+"Herndon, VA",69000.0,2023-01-23
+"Fort Meade, MD",125500.0,2023-01-23
+"Patuxent River, MD",97500.0,2023-01-23
+"Charlotte, NC",112500.0,2023-01-23
+"South Burlington, VT",66000.0,2023-01-23
+"Social Circle, GA",129500.0,2023-01-23
+"Pensacola, FL",136500.0,2023-01-23
+"Rockville, MD",75000.0,2023-01-23
+"Kennesaw, GA",106500.0,2023-01-23
+"Portland, ME",141500.0,2023-01-23
+"New York, NY",135500.0,2023-01-23
+"Corvallis, OR",85000.0,2023-01-23
+"Houston, TX",150500.0,2023-01-23
+"Lexington, MA",83500.0,2023-01-23
+"Dallas, TX",109500.0,2023-01-23
+"Tilton, NH",65000.0,2023-01-23
+"Deer Park, TX",80500.0,2023-01-23
+"Holliston, MA",68000.0,2023-01-23
+"Schoolcraft, MI",90000.0,2023-01-23
+"Canton, OH",25200.0,2023-01-23
+"Fort Worth, TX",47000.0,2023-01-23
+"Huntsville, AL",86500.0,2023-01-23
+"El Segundo, CA",132000.0,2023-01-23
+"Kirkland, WA",45900.0,2023-01-23
+"Chicago, IL",42500.0,2023-01-23
+"New York, NY",,2023-01-23
+"Battle Creek, MI",64000.0,2023-01-23
+"Marshalltown, IA",77000.0,2023-01-23
+"Boulder, CO",85000.0,2023-01-23
+"Boston, MA",162500.0,2023-01-23
+"Rolling Meadows, IL",67000.0,2023-01-23
+"Eglin AFB, FL",150500.0,2023-01-23
+"Rolling Meadows, IL",88500.0,2023-01-23
+"Denver, CO",72900.0,2023-01-23
+"Denver, CO",44100.0,2023-01-23
+"Newington, CT",57500.0,2023-01-23
+"Cambridge, MD",86000.0,2023-01-23
+"Sidney, OH",57000.0,2023-01-23
+"Rolling Meadows, IL",102500.0,2023-01-23
+"Parsippany, NJ",84500.0,2023-01-23
+"Dallas, TX",42500.0,2023-01-23
+Remote,,2023-01-23
+"Denver, CO",98100.0,2023-01-23
+"Rolling Meadows, IL",95000.0,2023-01-23
+"Hampton, VA",86000.0,2023-01-23
+"Portland, OR",18900.0,2023-01-23
+"Malvern, PA",122500.0,2023-01-23
+"Lititz, PA",55000.0,2023-01-23
+"Chicago, IL",112500.0,2023-01-23
+"New York, NY",185400.0,2023-01-23
+"Boca Raton, FL",110000.0,2023-01-23
+Remote,117500.0,2023-01-23
+"Austin, TX",102500.0,2023-01-23
+"San Mateo, CA",104000.0,2023-01-23
+"Natick, MA",115500.0,2023-01-23
+"Grand Rapids, MI",62500.0,2023-01-23
+"Somerville, MA",175000.0,2023-01-23
+"Arlington, VA",89500.0,2023-01-23
+"Boise, ID",122000.0,2023-01-23
+"Herndon, VA",175000.0,2023-01-23
+"Topeka, KS",89000.0,2023-01-23
+"Rome, GA",112500.0,2023-01-23
+"Pittsburgh, PA",82500.0,2023-01-23
+"Camden, NJ",91000.0,2023-01-23
+"Boston, MA",95000.0,2023-01-23
+"Wellesley Hills, MA",29000.0,2023-01-23
+"Hartford, CT",151000.0,2023-01-23
+"Beachwood, OH",87500.0,2023-01-23
+"Chandler, AZ",83500.0,2023-01-23
+"San Diego, CA",101000.0,2023-01-23
+"Atlanta, GA",94000.0,2023-01-23
+"Denver, CO",62500.0,2023-01-23
+"Bethesda, MD",116000.0,2023-01-23

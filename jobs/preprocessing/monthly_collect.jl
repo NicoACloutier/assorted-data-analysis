@@ -3,14 +3,13 @@ using Gumbo
 using Cascadia
 using CSV
 using DataFrames
+using Dates
 
 #This script collects job data from job posting websites.
 #Output dataframe:
 #	raw.csv in the subdirectory data\raw of the project folder
-#	it has five columns. One is the job title, the second is
-#	the company the job is with, then after that there is
-#	the date posted, then the place where it was posted, then
-#	the description.
+#	it has five columns: the title, the company, the location,
+#	the salary, and the date the collection script ran.
 
 const DATA_DIR = "..\\data\\raw"
 
@@ -73,7 +72,9 @@ function main()
 		push!(df, to_array(page))
 	end
 	
+	current_date = today()
 	df = unique(df)
+	df[!, "Date"] .= current_date
 	
 	CSV.write("$(DATA_DIR)\\raw.csv", df)
 end

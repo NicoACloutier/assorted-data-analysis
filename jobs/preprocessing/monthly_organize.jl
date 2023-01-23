@@ -95,18 +95,21 @@ function main()
 	(all_words, titles) = find_words(df[!, "Title"])
 	title_df = DataFrame(to_dict(all_words, titles))
 	title_df[!, "Salary"] = df[!, "Parsed_Salary"]
+	title_df[!, "Date"] = df[!, "Date"]
 	
 	CSV.write("$(OUTPUT_DIR)\\titles.csv", title_df)
 	
 	geography_df = DataFrame()
 	geography_df[!, "Location"] = df[!, "Location"]
 	geography_df[!, "Salary"] = df[!, "Parsed_Salary"]
+	geography_df[!, "Date"] = df[!, "Date"]
 	
 	CSV.write("$(OUTPUT_DIR)\\geography.csv", geography_df)
 	
 	company_df = DataFrame()
 	company_df[!, "Company"] = df[!, "Company"]
 	company_df[!, "Salary"] = df[!, "Parsed_Salary"]
+	company_df[!, "Date"] = df[!, "Date"]
 	
 	CSV.write("$(OUTPUT_DIR)\\companies.csv", company_df)
 	
