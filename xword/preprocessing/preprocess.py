@@ -1,6 +1,6 @@
+from unidecode import unidecode
 import pandas as pd
 import collections
-from unidecode import unidecode
 import random
 
 #This script removes non-unicode characters, puts the text in lowercase, and makes sure the 
@@ -10,15 +10,14 @@ import random
 
 MAX_LENGTH = 20 #maximum length of answers/clues
 DATA_DIR = '..\\data'
-PROPORTIONS = [0.8, 0.5, 0.25, 0.1] #proportion of characters in answers that will be obscured
-TIMES_AUGMENTED = 3 #how many times each column should appear in the augmented dataset
+PROPORTIONS = [0.5, 0.25, 0.1, 0] #proportion of characters in answers that will be obscured
 
 cutoff = lambda string: string if len(string) <= MAX_LENGTH else string[:MAX_LENGTH] #cutoff string if greater than max length
-replace_character = lambda char, proportion: char if random.random() >= proportion else '_' #randomly replace character with '_' a certain proportion of the time
+replace_character = lambda char: char if random.random() <= random.choice(PROPORTIONS) else '_' #randomly replace character with '_' a certain proportion of the time
 
 #randomly replace a proportion of the characters in a string with '_'.
-def obscure(string, proportion):
-    string = [replace_character(char, proportion) for char in string]
+def obscure(string):
+    string = [replace_character(char) for char in string]
     string = ''.join(string)
     return string
 
@@ -35,22 +34,10 @@ def main():
     df = df.drop(test_df.index)
     
     #obscure different proportions of the answer
-    dataframes = []
-    for proportion in PROPORTIONS:
-        temp_df = df.copy()
-        temp_df['Obscured'] = temp_df['Answer'].apply(lambda x: obscure(x, proportion))
-        dataframes.append(temp_df)
-    
-    df = pd.concat(dataframes)
+    df['Obscured'] = df['Answer'].apply(obscure)
     df = df.sample(frac=1)
     
-    test_dataframes = []
-    for proportion in PROPORTIONS:
-        temp_df = test_df.copy()
-        temp_df['Obscured'] = temp_df['Answer'].apply(lambda x: obscure(x, proportion))
-        test_dataframes.append(temp_df)
-    
-    test_df = pd.concat(test_dataframes)
+    test_df['Obscured'] = test_df['Answer'].apply(obscure)
     test_df = test_df.sample(frac=1)
     
     df.to_csv(f'{DATA_DIR}\\train.csv', index=False)
