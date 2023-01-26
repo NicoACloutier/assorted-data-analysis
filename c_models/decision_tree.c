@@ -3,7 +3,7 @@
 #include<math.h>
 #include<float.h>
 
-//DECISION TREE REGRESSOR (unfinished)
+//DECISION TREE REGRESSOR
 
 //a node of a DecisionTree
 struct Node {
@@ -148,6 +148,7 @@ int get_maximum_variance_dimension(struct MaskedDataset input) {
 	return maximum_var_dimension;
 }
 
+//return a return dataset with a changed mask list according to a new compare value
 struct MaskedDataset change_mask_list(struct MaskedDataset input, int dimension, double compare_value, int greater) {
 	int *mask_list = malloc(sizeof(int) * input.n);
 	
@@ -160,7 +161,7 @@ struct MaskedDataset change_mask_list(struct MaskedDataset input, int dimension,
 	int is_greater;
 	
 	for (int i = 0; i < input.n; i++) {
-		if (input.mask_list) {
+		if (input.mask_list[i]) {
 			is_greater = (greater) ? (input.x[i][dimension] > compare_value) : (input.x[i][dimension] <= compare_value);
 			mask_list[i] = is_greater;
 			remaining += is_greater;
@@ -187,6 +188,7 @@ struct MaskedDataset keep_mask_list(struct MaskedDataset input, struct MaskedDat
 	return output;
 }
 
+//copy a node's data to a node's pointer
 void copy_pointer(struct Node *node_pointer, struct Node to_copy_node) {
 	node_pointer->dimension = to_copy_node.dimension;
 	node_pointer->compare_value = to_copy_node.compare_value;
@@ -200,7 +202,7 @@ void copy_pointer(struct Node *node_pointer, struct Node to_copy_node) {
 //Fit a particular node (get its compare value and dimension).
 //Node should already have specifications for the dimensions of the return vector and the minimum observations for stopping.
 //Recurse until a stopping condition is met,
-//Conditions: a certain number or less of datapoints remain, or all datapoint inputs are equal to each other
+//Conditions: a certain number or less of datapoints remain or all datapoint inputs are equal to each other
 //Returns first node with pointers to next two, etc.
 struct Node best_fit(struct Node node, struct MaskedDataset input, struct MaskedDataset output, int free_mask_lists) {
 	if ((input.remaining <= node.minimum_observations) || (is_the_same(input))) {
@@ -223,7 +225,7 @@ struct Node best_fit(struct Node node, struct MaskedDataset input, struct Masked
 	struct MaskedDataset less_input = change_mask_list(input, maximum_var_dimension, maximum_var_mean, 0);
 	struct MaskedDataset greater_output = keep_mask_list(greater_input, output); //copy the output data with input config
 	struct MaskedDataset less_output = keep_mask_list(less_input, output); //copy the output data with input config
-	
+
 	node.greater_pointer = (struct Node *) malloc(sizeof(struct Node));
 	struct Node greater_node = copy_node(node);
 	greater_node = best_fit(greater_node, greater_input, greater_output, 0);
