@@ -24,7 +24,7 @@ MODEL_PATH = '.\\saves\\pretrained.pth'
 #PRETRAIN_PATH = '.\\saves\\pretrained.pth'
 #DATA_PATH = '..\\data\\train.csv'
 #MODEL_PATH = '..\\saves\\'
-#NUM_SPLITS = 7
+#NUM_SPLITS = 1
 
 letter_vectors = Word2Vec.load('..\\preprocessing\\word2vec.model') #load word2vec model
 
@@ -156,7 +156,7 @@ def train(xvalidation, split=None, num_splits=None):
         print(f'\nEPOCH {epoch+1}\n') 
         total_loss = 0 
         start = time.time() 
-        hidden = torch.as_tensor(np.zeros(train_source[0].dims)).to('cuda')
+        hidden = torch.as_tensor(np.zeros(train_target[0].shape), dtype=train_target[0].dtype).to('cuda')
         for (i, sequence) in enumerate(train_source):
             target = train_target[i]
             output = model.forward(sequence, hidden)
