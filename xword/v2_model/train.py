@@ -6,6 +6,7 @@ import pandas as pd
 import time
 import functools
 import numpy as np
+import re
 
 #This script pretrains the model on raw text data.
 #It can also be easily adapted to do the main training. In order to do that,
@@ -53,6 +54,17 @@ def secs_to_str(seconds_elapsed):
         return f'{seconds_elapsed/60:.3f} minutes'
     else:
         return '1 minute'
+
+#convert a pytorch tensor of word2vec letters into a string
+def tensor_to_word(input_tensor):
+    word = ''
+    input_list = input_tensor.tolist()
+    for word2vec in input_list:
+        letter_vector = np.array(word2vec)
+        letter = letter_vectors.wv.most_similar(positive=[letter_vector], topn=1)[0]
+        word += letter[0]
+    word = re.sub('[" ]+', '', word)
+    return word
 
 #train a model on a certain split of the data.
 #only give split and num_splits if you are using xvalidation.
@@ -144,9 +156,10 @@ def train(xvalidation, split=None, num_splits=None):
         print(f'\nEPOCH {epoch+1}\n') 
         total_loss = 0 
         start = time.time() 
+        hidden = torch.as_tensor(np.zeros(train_source[0].dims)).to('cuda')
         for (i, sequence) in enumerate(train_source):
             target = train_target[i]
-            output = model.forward(sequence, target)
+            output = model.forward(sequence, hidden)
             loss = criterion(output, target)
             loss.backward() 
             optimizer.step() 
@@ -174,7 +187,12 @@ def train(xvalidation, split=None, num_splits=None):
                 total_loss = 0
                 end = time.time()
                 elapsed = end - start
-                print(f'Iteration number {i+1}.	Loss: {avg_loss:.3f}.	Time: {secs_to_str(elapsed)}. Validation loss: {avg_valid_loss:.3f}') #report
+                word = tensor_to_word(output)
+                print(f'Iteration number {i+1}.	Loss: {avg_loss:.4f}.	Time: {secs_to_str(elapsed)}. Validation loss: {avg_valid_loss:.4f}') #report
+                word = tensor_to_word(output)
+                print(f'Sample row:')
+                print(df.iloc[i])
+                print(f'Given answer: {word}.\n')
                 start = time.time() #reset start time
             
             if (i+1) % (BATCH_SIZE * 10) == 0:
