@@ -74,28 +74,22 @@ function main()
 	title_df[!, "PostingID"] = range(1, nrow(title_df))
 
 	db = SQLite.DB("$(DATA_DIR)\\jobs.db")
-	println("CREATE TABLE IF NOT EXISTS Companies(PostingID INTEGER, Company TEXT, Salary INTEGER, Date TEXT)")
 	SQLite.execute(db, "CREATE TABLE IF NOT EXISTS Companies(PostingID INTEGER, Company TEXT, Salary INTEGER, Date TEXT)")
-	println("CREATE TABLE IF NOT EXISTS Geography(PostingID INTEGER, Location TEXT, Salary INTEGER, Date BLOB)")
 	SQLite.execute(db, "CREATE TABLE IF NOT EXISTS Geography(PostingID INTEGER, Location TEXT, Salary INTEGER, Date BLOB)")
 	title_columns = get_name_strings(title_df, true)
-	println("CREATE TABLE IF NOT EXISTS Title(PostingID INTEGER, $(title_columns)Salary INTEGER, Date BLOB)")
 	SQLite.execute(db, "CREATE TABLE IF NOT EXISTS Title(PostingID INTEGER, $(title_columns)Salary INTEGER, Date BLOB)")
 	
 	df_values = to_values(company_df)
 	query = "INSERT INTO Companies(PostingID, Company, Salary, Date) VALUES $(df_values)"
-	println(query)
 	SQLite.execute(db, query)
 	
 	df_values = to_values(location_df)
 	query = "INSERT INTO Geography(PostingID, Location, Salary, Date) VALUES $(df_values)"
-	println(query)
 	SQLite.execute(db, query)
 	
 	df_values = to_values(title_df)
 	title_columns = get_name_strings(title_df, false)
 	query = "INSERT INTO Title(PostingID, $(title_columns)Salary, Date) VALUES $(df_values)"
-	println(query)
 	SQLite.execute(db, query)
 end
 
