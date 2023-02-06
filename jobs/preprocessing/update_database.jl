@@ -4,12 +4,30 @@ using DataFrames
 
 const DATA_DIR = "..\\data\\cleaned"
 
+function no_punctuation(str)
+	isnothing(match(r"[./,-]", str))
+end
+
 #convert list of column names to string for SQLite query
 function to_string(column_list)
 	str = ""
+	column_list = [column for column in column_list if no_punctuation(column)]
 	for column in column_list
-		if (isnothing(match(r"[./,-]", column)))
+		str *= "$(column) INTEGER, "
+	end
+	str
+end
+
+function get_name_strings(df, add_type)
+	special_columns = ["PostingID", "Salary", "Date"]
+	str = ""
+	columns = [name for name in names(df) if !in(name, special_columns)]
+	columns = [name for name in columns if no_punctuation(name)]
+	for column in columns
+		if add_type
 			str *= "$(column) INTEGER, "
+		else
+			str *= "$(column), "
 		end
 	end
 	str
@@ -23,6 +41,7 @@ function to_values(df)
 	special_columns = ["PostingID", "Salary", "Date"]
 	str = ""
 	columns = [name for name in names(df) if !in(name, special_columns)]
+	columns = [name for name in columns if no_punctuation(name)]
 	
 	for row in eachrow(df)
 		posting_id = row.PostingID
@@ -32,7 +51,7 @@ function to_values(df)
 		str *= "($(posting_id), "
 		for column in columns
 			value = row[column]
-			value = remove_single_quote(value)
+			value = remove_single_quote(string(value))
 			str *= "'$(value)', "
 		end
 		str *= "$(salary), '$(date)'), "
@@ -52,17 +71,31 @@ function main()
 	
 	company_df[!, "PostingID"] = range(1, nrow(company_df))
 	location_df[!, "PostingID"] = range(1, nrow(location_df))
+	title_df[!, "PostingID"] = range(1, nrow(title_df))
 
 	db = SQLite.DB("$(DATA_DIR)\\jobs.db")
+	println("CREATE TABLE IF NOT EXISTS Companies(PostingID INTEGER, Company TEXT, Salary INTEGER, Date TEXT)")
 	SQLite.execute(db, "CREATE TABLE IF NOT EXISTS Companies(PostingID INTEGER, Company TEXT, Salary INTEGER, Date TEXT)")
-	SQLite.execute(db, "CREATE TABLE IF NOT EXISTS Geography(PostingID INTEGER, Location TEXT, Salary INTEGER, Date BLOB);")
+	println("CREATE TABLE IF NOT EXISTS Geography(PostingID INTEGER, Location TEXT, Salary INTEGER, Date BLOB)")
+	SQLite.execute(db, "CREATE TABLE IF NOT EXISTS Geography(PostingID INTEGER, Location TEXT, Salary INTEGER, Date BLOB)")
+	title_columns = get_name_strings(title_df, true)
+	println("CREATE TABLE IF NOT EXISTS Title(PostingID INTEGER, $(title_columns)Salary INTEGER, Date BLOB)")
+	SQLite.execute(db, "CREATE TABLE IF NOT EXISTS Title(PostingID INTEGER, $(title_columns)Salary INTEGER, Date BLOB)")
 	
 	df_values = to_values(company_df)
-	query = "INSERT INTO Companies(PostingID, Company, Salary, Date) VALUES $(df_values);"
+	query = "INSERT INTO Companies(PostingID, Company, Salary, Date) VALUES $(df_values)"
+	println(query)
 	SQLite.execute(db, query)
 	
 	df_values = to_values(location_df)
-	query = "INSERT INTO Geography(PostingID, Location, Salary, Date) VALUES $(df_values);"
+	query = "INSERT INTO Geography(PostingID, Location, Salary, Date) VALUES $(df_values)"
+	println(query)
+	SQLite.execute(db, query)
+	
+	df_values = to_values(title_df)
+	title_columns = get_name_strings(title_df, false)
+	query = "INSERT INTO Title(PostingID, $(title_columns)Salary, Date) VALUES $(df_values)"
+	println(query)
 	SQLite.execute(db, query)
 end
 
