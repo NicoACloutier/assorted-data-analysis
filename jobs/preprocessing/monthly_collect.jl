@@ -14,7 +14,7 @@ using Dates
 const DATA_DIR = "..\\data\\raw"
 
 const COMPANY_SELECTOR = sel".d-flex.justify-content-between.align-items-start"
-const TITLE_SELECTOR = sel".jobLink.css-1rd3saf.eigr9kq3"
+const TITLE_SELECTOR = sel".job-cardstyle__JobCardTitle-sc-1mbmxes-2.iQztVR"
 const LOCATION_SELECTOR = sel".d-flex.flex-wrap.css-11d3uq0.e1rrn5ka2" 
 const SALARY_SELECTOR = sel".d-flex.flex-wrap.css-1i7b5bu.e1rrn5ka1"
 
@@ -37,7 +37,10 @@ function parse_page(http_response)
 	postings = eachmatch(all_selector, page.root)[2:end]
 	
 	for posting in postings
-		push!(pages, parse_posting(posting))
+		try
+			push!(pages, parse_posting(posting))
+		catch
+		end
 	end
 	pages
 end
@@ -45,9 +48,14 @@ end
 #parse a singular job posting for various pieces of information
 function parse_posting(job_posting)
 	company = get_css(COMPANY_SELECTOR, job_posting)
+	print("1$(company)")
 	company = match(r">(.+)\<", string(company)).captures[1]
+	print("2$(company)")
 	title = get_css(TITLE_SELECTOR, job_posting)
+	print("3$(title)")
 	location = get_css(LOCATION_SELECTOR, job_posting)
+	print("4$(location)")
+	println("\n")
 	
 	try
 		salary = get_css(SALARY_SELECTOR, job_posting)[1]
