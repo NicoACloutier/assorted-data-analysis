@@ -87,6 +87,11 @@ function main()
 	query = "INSERT INTO Geography(PostingID, Location, Salary, Date) VALUES $(df_values)"
 	SQLite.execute(db, query)
 	
+	#remove columns not in db
+	name_words = DataFrame(SQLite.DBInterface.execute(db, "PRAGMA TABLE_INFO(Title)"))[!, "name"]
+	name_words = [name for name in name_words if name in names(title_df)]
+	title_df = select(title_df, name_words)
+	
 	df_values = to_values(title_df)
 	title_columns = get_name_strings(title_df, false)
 	query = "INSERT INTO Title(PostingID, $(title_columns)Salary, Date) VALUES $(df_values)"
