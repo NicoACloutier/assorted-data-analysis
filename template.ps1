@@ -33,4 +33,7 @@ cd .\model
 mkdir .\saves
 cd ..
 
+mkdir .\database
+cd ..
+
 cd ..
