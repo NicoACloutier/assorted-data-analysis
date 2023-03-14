@@ -11,11 +11,14 @@ DAYS_SURROUNDING = 4 #how many days surrounding the central day will be recorded
 OUTPUT_FILE = '..\\data\\raw\\raw.csv'
 
 #css selectors, name of variable is what button says
-BUTTON_SELECTOR = '.btn.btn-xs.btn-link.borderless.pop.ng-scope'
-DOWNLOAD_DROPDOWN_SELECTOR = 'panel.ng-isolate-scope.panel-default'
-FILETYPE_SELECTOR = 'li.radio.ng-scope'
-VARIABLE_DROPDOWN_SELECTOR = 'panel.ng-isolate-scope.panel-default'
-DOWNLOAD_SELECTOR = 'download-button'
+SUBSET_GET_DATA = ('btn.btn-xs.btn-link.borderless.pop.ng-scope', 0)
+DOWNLOAD_METHOD = ('accordion-toggle', 0)
+GET_FILE_SUBSETS_USING_OPENDAP = ('ng-valid.ng-not-empty.ng-dirty.ng-valid-parse.ng-touched', 1)
+VARIABLES = ('accordion-toggle', 3)
+FILE_FORMAT = ('accordion-toggle', 0)
+ASCII = ('ng-valid.ng-not-empty.ng-dirty.ng-valid-parse.ng-touched', 0)
+GET_DATA = ('btn.btn-success.modal-footer-btn', 0)
+DOWNLOAD_LINK_LIST = ('download-button.download-link-disabled', 0)
 
 #parse the ascii text data from NASA data website
 def parse_ascii(text):
@@ -44,13 +47,31 @@ def to_df(array, start_columns):
     df = pd.DataFrame(data=array, columns=columns)
     return df
 
+#click on each of the buttons in a list
+def click_buttons(driver, button_list):
+    for (selector, index) in button_selectors:
+        driver.find_elements_by_css_selector(selector)[index].click()
+        
+        #close dropdown if the item is a dropdown
+        if selector == 'accordion-toggle':
+            driver.find_elements_by_css_selector(selector)[index].click()
+    
+
 def main():
     driver.get(URL)
-    button_selectors = [BUTTON_SELECTOR, DOWNLOAD_DROPDOWN_SELECTOR, FILETYPE_SELECTOR, 
-                        VARIABLE_DROPDOWN_SELECTOR, DOWNLOAD_SELECTOR] #TODO: finish collecting selectors
-    for selector in button_selectors:
-        driver.find_element_by_css_selector(selector).click()
-    links = string(drive.find_element_by_tag_name('body')).split('\n')
+    button_selectors = [SUBSET_GET_DATA, DOWNLOAD_METHOD, GET_FILE_SUBSETS_USING_OPENDAP] #initial buttons
+    
+    click_buttons(driver, button_selectors) #click the initial buttons
+    
+    #click on all of the variables
+    driver.find_elements_by_css_selector(VARIABLES[0])[VARIABLES[1]].click()
+    for element in driver.find_elements_by_css_selector('checkbox-inline'):
+        element.click()
+    driver.find_elements_by_css_selector(VARIABLES[0])[VARIABLES[1]].click()
+    
+    click_buttons(driver, [FILE_FORMAT, ASCII, GET_DATA]) #click on the final buttons
+    
+    links = string(drive.find_element_by_tag_name('body')).split('\n')[1:] #first link is readme, ignore
     driver.quit()
     
     df = pd.DataFrame()
