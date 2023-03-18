@@ -2,6 +2,7 @@ import pandas as pd
 import selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 import urllib
 import time
 import numpy as np
@@ -18,11 +19,14 @@ DOWNLOAD_METHOD = ('.accordion-toggle', 0)
 GET_FILE_SUBSETS_USING_OPENDAP = ('.ng-pristine.ng-untouched.ng-valid.ng-not-empty', 1)
 VARIABLES = ('.accordion-toggle', 3)
 FILE_FORMAT = ('.accordion-toggle', 4)
-ASCII = ('.ng-pristine.ng-untouched.ng-valid.ng-not-empty', 0)
+ASCII = ('.ng-pristine.ng-untouched.ng-valid.ng-not-empty', 2)
 GET_DATA = ('.btn.btn-success.modal-footer-btn', 0)
 DOWNLOAD_LINK_LIST = ('.download-button.download-link-disabled', 0)
 
-wait = lambda: time.sleep(5)
+wait = lambda: time.sleep(3)
+
+#<input type="radio" ng-value="service" ng-model="subsetOptions.currentService" name="OPeNDAP" ng-click="checkSelection();" class="ng-valid ng-not-empty ng-dirty ng-valid-parse ng-touched" value="[object Object]" aria-invalid="false" data-gtm-form-interact-field-id="0">
+#<input type="radio" ng-value="format" ng-model="subsetOptions.format" ng-disabled="checkDisabled(format)" name="ASCII" ng-click="checkSelection();" class="ng-pristine ng-untouched ng-valid ng-not-empty" value="[object Object]" aria-invalid="false">
 
 #parse the ascii text data from NASA data website
 def parse_ascii(text):
@@ -55,10 +59,10 @@ def to_df(array, start_columns):
 def click_buttons(driver, button_list):
     for (selector, index) in button_list:
         element = driver.find_elements(By.CSS_SELECTOR, selector)[index]
-        print(element)
+        hover = ActionChains(driver).move_to_element(element)
+        hover.perform()
         element.click()
         wait()
-    
 
 def main():
     driver = webdriver.Chrome(CHROMEDRIVER_PATH)
@@ -75,6 +79,8 @@ def main():
     wait()
     
     click_buttons(driver, [VARIABLES, FILE_FORMAT, ASCII, FILE_FORMAT, GET_DATA]) #click on the final buttons
+    for _ in range(60): wait() #have it wait for 3 minutes so the data can be generated
+    click_buttons(driver, [DOWNLOAD_LINK_LIST]) #download the link list
     
     links = string(drive.find_element_by_tag_name('body')).split('\n')[1:] #first link is readme, ignore
     driver.quit()
