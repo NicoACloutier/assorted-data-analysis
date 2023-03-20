@@ -73,60 +73,60 @@ def get_values(identifier, cities, i, url, dates):
         all_values.append(temp_dict)
     os.remove(name) #remove file from computer
     return all_values
+    
+#make a string of a number, and add 0 to the beginning if 1-digit
+def add_zero(number):
+    number = str(number)
+    if len(number) == 1:
+        number = '0' + number
+    return number
+
+#get list of urls from city information
+def get_urls(cities, dates, level, basic):
+    urls = dict()
+    row_list = []
+    col_list = []
+    for city in cities:
+        row_list.append(city.row)
+        col_list.append(city.col)
+    row_list = list(set(row_list))
+    col_list = list(set(col_list))
+    for row in row_list:
+        for col in col_list:
+            urls[f'{row}-{col}'] = []
+            for date in dates:
+                urls[f'{row}-{col}'].append(f'{basic}{date}/500m/{level}/{row}/{col}.png')
+    return urls
+
+#get dictionary of unique row-column combinations for each city, along with corresponding cities
+def get_cities(citylist):
+    identifiers = dict()
+    for city in citylist:
+        if f'{city.row}-{city.col}' not in identifiers:
+            identifiers[f'{city.row}-{city.col}'] = [city]
+        else:
+            identifiers[f'{city.row}-{city.col}'].append(city)
+    return identifiers
+
+#transpose a matrix
+def transpose(matrix):
+    num_rows = len(matrix[0])
+    num_columns = len(matrix)
+    Final = [[0]*num_columns for x in range(num_rows)]
+    for x in range(num_rows):
+        for i in range(num_columns):
+            Final[x][i] = matrix[i][x]
+    return Final
+
+#get a vector from a matrix
+def squish(collection):
+    final = []
+    for row in collection:
+        final += row
+    return final
 
 def main():
     start = time.time()
-    
-    #make a string of a number, and add 0 to the beginning if 1-digit
-    def add_zero(number):
-        number = str(number)
-        if len(number) == 1:
-            number = '0' + number
-        return number
-    
-    #get list of urls from city information
-    def get_urls(cities, dates, level, basic):
-        urls = dict()
-        row_list = []
-        col_list = []
-        for city in cities:
-            row_list.append(city.row)
-            col_list.append(city.col)
-        row_list = list(set(row_list))
-        col_list = list(set(col_list))
-        for row in row_list:
-            for col in col_list:
-                urls[f'{row}-{col}'] = []
-                for date in dates:
-                    urls[f'{row}-{col}'].append(f'{basic}{date}/500m/{level}/{row}/{col}.png')
-        return urls
-    
-    #get dictionary of unique row-column combinations for each city, along with corresponding cities
-    def get_cities(citylist):
-        identifiers = dict()
-        for city in citylist:
-            if f'{city.row}-{city.col}' not in identifiers:
-                identifiers[f'{city.row}-{city.col}'] = [city]
-            else:
-                identifiers[f'{city.row}-{city.col}'].append(city)
-        return identifiers
-    
-    #transpose a matrix
-    def transpose(matrix):
-        num_rows = len(matrix[0])
-        num_columns = len(matrix)
-        Final = [[0]*num_columns for x in range(num_rows)]
-        for x in range(num_rows):
-            for i in range(num_columns):
-                Final[x][i] = matrix[i][x]
-        return Final
-    
-    #get a vector from a matrix
-    def squish(collection):
-        final = []
-        for row in collection:
-            final += row
-        return final
     
     #define zoom level, basic url, and get list of dates
     basic = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/VIIRS_SNPP_DayNightBand_At_Sensor_Radiance/default/'
