@@ -3,7 +3,7 @@ import selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-import urllib
+import urllib.request as request
 import time
 import numpy as np
 
@@ -19,14 +19,11 @@ DOWNLOAD_METHOD = ('.accordion-toggle', 0)
 GET_FILE_SUBSETS_USING_OPENDAP = ('.ng-pristine.ng-untouched.ng-valid.ng-not-empty', 1)
 VARIABLES = ('.accordion-toggle', 3)
 FILE_FORMAT = ('.accordion-toggle', 4)
-ASCII = ('.ng-pristine.ng-untouched.ng-valid.ng-not-empty', 2)
+ASCII = ("//input[@class='ng-pristine ng-untouched ng-valid ng-not-empty']", 2)
 GET_DATA = ('.btn.btn-success.modal-footer-btn', 0)
-DOWNLOAD_LINK_LIST = ('.download-button.download-link-disabled', 0)
+DOWNLOAD_LINK_LIST = ('.download-button', 0)
 
 wait = lambda: time.sleep(3)
-
-#<input type="radio" ng-value="service" ng-model="subsetOptions.currentService" name="OPeNDAP" ng-click="checkSelection();" class="ng-valid ng-not-empty ng-dirty ng-valid-parse ng-touched" value="[object Object]" aria-invalid="false" data-gtm-form-interact-field-id="0">
-#<input type="radio" ng-value="format" ng-model="subsetOptions.format" ng-disabled="checkDisabled(format)" name="ASCII" ng-click="checkSelection();" class="ng-pristine ng-untouched ng-valid ng-not-empty" value="[object Object]" aria-invalid="false">
 
 #parse the ascii text data from NASA data website
 def parse_ascii(text):
@@ -78,17 +75,25 @@ def main():
         element.click()
     wait()
     
-    click_buttons(driver, [VARIABLES, FILE_FORMAT, ASCII, FILE_FORMAT, GET_DATA]) #click on the final buttons
-    for _ in range(60): wait() #have it wait for 3 minutes so the data can be generated
-    click_buttons(driver, [DOWNLOAD_LINK_LIST]) #download the link list
+    click_buttons(driver, [VARIABLES, FILE_FORMAT])
     
-    links = string(drive.find_element_by_tag_name('body')).split('\n')[1:] #first link is readme, ignore
+    #ascii button just really wants to be different
+    element = driver.find_elements(By.XPATH, ASCII[0])[ASCII[1]]
+    hover = ActionChains(driver).move_to_element(element)
+    hover.perform()
+    element.click()
+    
+    click_buttons(driver, [FILE_FORMAT, GET_DATA]) #click on the final buttons
+    for _ in range(40): wait() #have it wait for 1.5 minutes so the data can be generated
+    
+    url = driver.find_elements(By.CSS_SELECTOR, DOWNLOAD_LINK_LIST[0])[DOWNLOAD_LINK_LIST[1]].get_attribute('href')
+    links = str(request.urlopen(url).read()).split('\\r\\n')[1:]
     driver.quit()
     
     df = pd.DataFrame()
     
     for link in links:
-        text = urllib.open(link).read()
+        text = request.urlopen(link).read()
         temp_df = parse_ascii(text)
         array = split_up(temp_df)
         array = np.random.choice(array, replace=False, size=(len(array) // FRACTION)) #select proportion of data
