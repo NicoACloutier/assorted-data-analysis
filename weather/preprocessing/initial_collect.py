@@ -8,15 +8,18 @@ import time
 import numpy as np
 import os
 import sqlite3
+import threading
 
 #This script downloads the data from 1980 to the latest date from the MDISC site. There is a lot of data, so it only saves a subset.
 
 URL = 'https://disc.gsfc.nasa.gov/datasets/M2I3NPASM_5.12.4/summary'
-PROPORTION = 0.001 #fraction of data to be kept, in form 1/FRACTION
+PROPORTION = 0.001 #proportion of data to be kept
 DAYS_SURROUNDING = 4 #how many days surrounding the central day will be recorded on each side 
 OUTPUT_FILE = '..\\data\\raw\\raw.csv'
 CHROMEDRIVER_PATH = 'C:\\Users\\nicoc\\Documents\\chromedriver.exe'
-DATABASE_PATH = '..\\data\\database\\weather.db'
+DATABASE_PATH = '..\\database\\weather.db'
+NUM_THREADS = 10
+df = pd.DataFrame()
 
 #for this script to work, you have to have environment variables with the following names saved with user and password
 USERNAME = os.environ['MDISC_DATA_USER']
@@ -71,10 +74,11 @@ def click_buttons(driver, button_list):
         wait()
 
 #read the text from a list of ascii links
-def read_ascii_links(links):
-    df = pd.DataFrame()
+def read_ascii_links(begin, end, lock, links):
+    global df #sorry not sorry
+    dfs = []
     
-    for link in links:
+    for link in links[begin:end]:
         #actually read the ascii, process
         text = str(requests.get(link, auth=(USERNAME, PASSWORD)).content)
         temp_df = parse_ascii(text)
@@ -84,12 +88,16 @@ def read_ascii_links(links):
         array = array[:end]
         to_add_df = to_df(array, temp_df.columns.values)
         
-        #write to df
-        df = pd.concat([df, to_add_df])
+        dfs.append(to_add_df)
     
-    return df
+    #write to df
+    output_df = pd.concat(dfs)
+    lock.acquire()
+    df = pd.concat([df, output_df])
+    lock.release()
 
 def main():
+
     driver = webdriver.Chrome(CHROMEDRIVER_PATH)
     driver.get(URL)
     wait()
@@ -118,13 +126,29 @@ def main():
     links = str(requests.get(url).content).split('\\r\\n')[1:]
     driver.quit()
     
-    df = read_ascii_links(links)
+    threads = []
+    lock = threading.Lock()
+    for x in range(NUM_THREADS):
+        begin = len(links) * x // NUM_THREADS #the beginning country id for this thread
+        end = len(links) * (x+1) // NUM_THREADS #the ending country id for this thread
+        thread = threading.Thread(target=read_ascii_links, args=(begin, end, lock, links))
+        thread.start()
+        threads.append(thread)
     
+    for thread in threads:
+        thread.join()
+    
+    #write df to db
     connection = sqlite3.connect(DATABASE_PATH)
-    df.to_sql(con=connection, name='raw_weather', if_exists='replace', flavor='sqlite')
+    column_strings = ' real, '.join(df.columns.values)[:-2]
+    query = f'CREATE TABLE IF NOT EXISTS weather ({column_strings})'
+    connection.execute(query)
+    df.to_sql('weather', con=connection, if_exists='replace', index=False)
+    connection.commit()
+    connection.close()
     
-    df = df.sample(frac=0.01) #save subset of data to local file, just to view structure
-    df.to_csv(OUTPUT_FILE, index=False)
+    sample_df = df.sample(frac=0.01) #save subset of data to local file, just to view structure
+    sample_df.to_csv(OUTPUT_FILE, index=False)
 
 if __name__ == '__main__':
     main()
