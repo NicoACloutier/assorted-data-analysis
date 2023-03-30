@@ -2,20 +2,23 @@ import sklearn
 import xgboost
 import pandas as pd
 import numpy as np
-from sklearn import svm, linear_model, preprocessing, tree, ensemble
-import time
+from sklearn import svm, linear_model, preprocessing, tree, ensemble, cluster
+import imblearn
 
 NUM_SPLITS = 10 #k for k-fold xvalidation
 
 models = {'xgboost': xgboost.XGBRegressor,
           'linear': linear_model.LinearRegression,
-          'svm': svm.SVR,
           'l1': linear_model.Lasso,
           'l2': linear_model.Ridge,
           'poly2': preprocessing.PolynomialFeatures,
           'poly3': preprocessing.PolynomialFeatures,
           'regtree': tree.DecisionTreeRegressor,
           'forest': ensemble.RandomForestRegressor,}
+
+methods = {'RandomOver': imblearn.over_sampling.RandomOverSampler,
+           'RandomUnder': imblearn.under_sampling.RandomUnderSampler,
+           'none': None,}
 
 #split df into inputs and outputs
 def split_df(df):
@@ -41,17 +44,19 @@ def train_test_polynomial(poly, inputs, outputs, test_inputs, test_outputs):
     return list(answers)
 
 #train and test models
-def train_models(train_df, test_df):
+def train_models(train_df, test_df, kmean_labels, method):
     all_differences = []
     inputs, outputs = split_df(train_df)
     inputs, outputs = inputs.T, outputs.T
+    
+    if method != 'none':
+        (inputs, _) = methods[method](random_state=0).fit_resample(inputs, kmean_labels.reshape(-1, 1))
+        outputs = methods[method](random_state=0).fit_resample(outputs.reshape(-1, 1), kmean_labels.reshape(-1, 1))[0].ravel()
     
     test_inputs, test_outputs = split_df(test_df)
     test_inputs, test_outputs = test_inputs.T, test_outputs.T
 
     for model_name in models:
-        start = time.time()
-        
         if 'poly' in model_name:
             degree = int(model_name[-1]) #find the degree of the polynomial
             poly = models[model_name](degree=degree) #initialize model
@@ -62,21 +67,13 @@ def train_models(train_df, test_df):
             differences = test_models(model, test_inputs, test_outputs)
         
         all_differences.append(differences)
-        end = time.time()
-        print(f'Finished training {model_name} in {end-start:.2f} seconds.')
     
     return all_differences
 
-def main():
+def train_method(df, kmean_labels, method):
     all_answers = []
 
-    df = pd.read_csv('..\\data\\for_model\\biogas.csv')
-    df = df.sample(frac=1)
-    df = df.dropna()
     jump = len(df) // NUM_SPLITS
-    left_over = df.iloc[jump*NUM_SPLITS:]
-    df = df.drop(left_over.index) #get rid of left over samples
-    
     for split in range(NUM_SPLITS):
         test_begin = split * jump
         test_end = (split+1) * jump
@@ -87,8 +84,10 @@ def main():
         test_df = test_df.reset_index()
         train_df = train_df.reset_index()
         
+        temp_kmean_labels = np.array([label for (i, label) in enumerate(kmean_labels) if not test_begin <= i < test_end])
+        
         #train models, get answers for test data, and write to file
-        answers = train_models(train_df, test_df)
+        answers = train_models(train_df, test_df, temp_kmean_labels, method)
         for (i, column) in enumerate(answers):
             if i < len(all_answers):
                 all_answers[i] += column
@@ -101,7 +100,20 @@ def main():
         data_dict[column] = all_answers[i]
     
     output_df = pd.DataFrame(data_dict)
-    output_df.to_csv('..\\data\\for_model\\answers.csv', index=False)
+    output_df.to_csv(f'..\\data\\for_model\\answers-{method}.csv', index=False)
+
+def main():
+    df = pd.read_csv('..\\data\\for_model\\biogas.csv')
+    df = df.drop('Essay', axis=1)
+    df = df.sample(frac=1)
+    df = df.dropna()
+    jump = len(df) // NUM_SPLITS
+    left_over = df.iloc[jump*NUM_SPLITS:]
+    df = df.drop(left_over.index) #get rid of left over samples
+    kmean_labels = list(cluster.KMeans(n_clusters=2).fit(df.drop('Biogas', axis=1)).labels_)
+    
+    for method in methods:
+        train_method(df, kmean_labels, method)
 
 if __name__ == '__main__':
     main()
