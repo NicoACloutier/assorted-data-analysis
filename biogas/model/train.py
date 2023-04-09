@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from sklearn import svm, linear_model, preprocessing, tree, ensemble, cluster
 import imblearn
+import pickle
 
 NUM_SPLITS = 10 #k for k-fold xvalidation
 
@@ -27,7 +28,7 @@ def split_df(df):
     input_list = [list(df[column]) for column in input_columns]
     inputs = np.array(input_list)
     outputs = np.array(list(df['Biogas']))
-    return inputs, outputs
+    return inputs.T, outputs.T
    
 #get the answers for a model on test data and find differences
 def test_models(model, inputs, outputs):
@@ -47,14 +48,12 @@ def train_test_polynomial(poly, inputs, outputs, test_inputs, test_outputs):
 def train_models(train_df, test_df, kmean_labels, method):
     all_differences = []
     inputs, outputs = split_df(train_df)
-    inputs, outputs = inputs.T, outputs.T
     
     if method != 'none':
         (inputs, _) = methods[method](random_state=0).fit_resample(inputs, kmean_labels.reshape(-1, 1))
         outputs = methods[method](random_state=0).fit_resample(outputs.reshape(-1, 1), kmean_labels.reshape(-1, 1))[0].ravel()
     
     test_inputs, test_outputs = split_df(test_df)
-    test_inputs, test_outputs = test_inputs.T, test_outputs.T
 
     for model_name in models:
         if 'poly' in model_name:
@@ -70,7 +69,22 @@ def train_models(train_df, test_df, kmean_labels, method):
     
     return all_differences
 
-def train_method(df, kmean_labels, method):
+#train final model on all of the data
+def train_final(model_name, df):
+    inputs, outputs = split_df(df)
+    if 'poly' in model_name:
+        degree = int(model_name[-1]) #find the degree of the polynomial
+        poly = models[model_name](degree=degree) #initialize model
+        inputs = poly.fit_transform(inputs)
+        model = linear_model.LinearRegression()
+    else:
+        model = models[model_name]()
+    
+    model.fit(inputs, outputs)
+    with open(f'saves\\{model_name}.pkl', 'wb') as f:
+        pickle.dump(model, f)
+
+def test_method(df, kmean_labels, method):
     all_answers = []
 
     jump = len(df) // NUM_SPLITS
@@ -110,10 +124,13 @@ def main():
     jump = len(df) // NUM_SPLITS
     left_over = df.iloc[jump*NUM_SPLITS:]
     df = df.drop(left_over.index) #get rid of left over samples
-    kmean_labels = list(cluster.KMeans(n_clusters=2).fit(df.drop('Biogas', axis=1)).labels_)
+    kmean_labels = list(cluster.KMeans(n_clusters=3).fit(df.drop('Biogas', axis=1)).labels_)
     
     for method in methods:
-        train_method(df, kmean_labels, method)
+        test_method(df, kmean_labels, method)
+    
+    for model in models:
+        train_final(model, df)
 
 if __name__ == '__main__':
     main()
