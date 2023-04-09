@@ -83,6 +83,10 @@ def train_final(model_name, df):
     model.fit(inputs, outputs)
     with open(f'saves\\{model_name}.pkl', 'wb') as f:
         pickle.dump(model, f)
+    
+    if 'poly' in model_name:
+        with open(f'saves\\poly-{model_name}.pkl', 'wb') as f:
+            pickle.dump(poly, f)
 
 def test_method(df, kmean_labels, method):
     all_answers = []
