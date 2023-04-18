@@ -104,6 +104,31 @@ void subtract_in_place(Vector initial, Vector to_subtract) {
 	}
 }
 
+//multiply a matrix by another in-place
+void multiply_in_place(Matrix initial, Matrix to_multiply) {
+	for (int i = 0; i < initial.n; i++) {
+		for (int j = 0; j < initial.dimensions; j++) {
+			double row = 0;
+			for (int k = 0; k < initial.dimensions; k++) { row += initial.data[i][k] * to_multiply.data[k][j]; }
+			intial.data[i][j] = row;
+		}
+	}
+}
+
+//return number by number square matrix with one on diagonals, 0 elsewhere
+Matrix eye(int number) {
+	Matrix output;
+	output.n = number;
+	output.dimensions = number;
+	output.data = malloc(sizeof(double*) * number);
+	for (int i = 0; i < number; i++) {
+		for (int j = 0; j < number; j++) {
+			output.data[i][j] = (i==j);
+		}
+	}
+	return output;
+}
+
 //decompose a matrix into Q*R
 QRDecomposition qr_decompose(Matrix to_decompose) {
 	QRDecomposition qr;
@@ -213,5 +238,21 @@ Matrix find_cov_matrix(Matrix matrix){
 	return cov;
 }
 
-Vector find_eigenvalues(Matrix matrix) {}
+//find eigenvalues of matrix using qr decomposition
+Vector find_eigenvalues(Matrix matrix, int iterations) {
+	Matrix a_i;
+	Matrix qq = eye(matrix.n);
+	for (int i = 0; i < iterations; i++) {
+		QRDecomposition decomposition = qr_decompose(matrix);
+		multiply_in_place(qq, decomposition.q);
+	}
+	Vector eigenvalues;
+	eigenvalues.dimensions = qq.n;
+	eigenvalues.data = malloc(sizeof(double*) * qq.n);
+	for (int i = 0; i < eigenvalues.dimensions; i++) {
+		eigenvalues.data[i] = qq.data[i][i];
+	}
+	return eigenvalues;
+}
+
 Vector *find_eigenvectors(Matrix matrix, Vector eigenvalues) {}
