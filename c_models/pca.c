@@ -240,7 +240,6 @@ Matrix find_cov_matrix(Matrix matrix){
 
 //find eigenvalues of matrix using qr decomposition
 Vector find_eigenvalues(Matrix matrix, int iterations) {
-	Matrix a_i;
 	Matrix qq = eye(matrix.n);
 	for (int i = 0; i < iterations; i++) {
 		QRDecomposition decomposition = qr_decompose(matrix);
@@ -252,6 +251,9 @@ Vector find_eigenvalues(Matrix matrix, int iterations) {
 	for (int i = 0; i < eigenvalues.dimensions; i++) {
 		eigenvalues.data[i] = qq.data[i][i];
 	}
+	free_matrix(qq);
+	free_matrix(decomposition.q);
+	free_matrix(decomposition.r);
 	return eigenvalues;
 }
 
