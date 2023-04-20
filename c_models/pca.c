@@ -2,7 +2,7 @@
 #include<stdio.h>
 #include<math.h>
 
-//PRINCIPAL COMPONENT ANALYSIS
+//PRINCIPAL COMPONENT ANALYSIS (unfinished)
 
 typedef struct Matrix {
 	int n;
@@ -104,6 +104,12 @@ void subtract_in_place(Vector initial, Vector to_subtract) {
 	}
 }
 
+void subtract_matrix_in_place(Matrix initial, Matrix to_subtract) {
+	for (int i = 0; i < initial.n; i++) {
+		for (int j = 0; j < initial.dimensions; j++) { initial.data[i][j] -= to_subtract.data[i][j]; }
+	}
+}
+
 //multiply a matrix by another in-place
 void multiply_in_place(Matrix initial, Matrix to_multiply) {
 	for (int i = 0; i < initial.n; i++) {
@@ -112,6 +118,13 @@ void multiply_in_place(Matrix initial, Matrix to_multiply) {
 			for (int k = 0; k < initial.dimensions; k++) { row += initial.data[i][k] * to_multiply.data[k][j]; }
 			intial.data[i][j] = row;
 		}
+	}
+}
+
+//multiply matrix by scalar in place
+void multiply_by_scalar_in_place(Matrix matrix, double scalar) {
+	for (int i = 0; i < matrix.n; i++) {
+		for (int j = 0; j < matrix.dimensions; j++) { matrix.data[i][j] *= scalar; }
 	}
 }
 
@@ -242,19 +255,33 @@ Matrix find_cov_matrix(Matrix matrix){
 Vector find_eigenvalues(Matrix matrix, int iterations) {
 	Matrix qq = eye(matrix.n);
 	for (int i = 0; i < iterations; i++) {
-		QRDecomposition decomposition = qr_decompose(matrix);
+		QRDecomposition decomposition = qr_decompose(temp_matrix);
 		multiply_in_place(qq, decomposition.q);
 	}
+	
 	Vector eigenvalues;
 	eigenvalues.dimensions = qq.n;
 	eigenvalues.data = malloc(sizeof(double*) * qq.n);
 	for (int i = 0; i < eigenvalues.dimensions; i++) {
 		eigenvalues.data[i] = qq.data[i][i];
 	}
+	
 	free_matrix(qq);
 	free_matrix(decomposition.q);
 	free_matrix(decomposition.r);
 	return eigenvalues;
 }
 
-Vector *find_eigenvectors(Matrix matrix, Vector eigenvalues) {}
+//solve the linear systems to get eigenvectors
+Vector *find_eigenvectors(Matrix matrix, Vector eigenvalues) {
+	for (int i = 0; i < eigenvalues.dimensions; i++) {
+		Matrix temp_matrix = copy_matrix(matrix);
+		Matrix id_matrix = eye(matrix.n);
+		
+		double eigenvalue = eigenvalues.data[i];
+		multiply_by_scalar_in_place(id_matrix, eigenvalue);
+		subtract_matrix_in_place(temp_matrix, id_matrix);
+		
+		
+	}
+}
