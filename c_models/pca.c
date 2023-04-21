@@ -59,6 +59,15 @@ double dot(Vector vector1, Vector vector2) {
 	return sum;
 }
 
+//make a vector of zeros with `number` dimensions
+Vector zeros(int number) {
+	Vector vector;
+	vector.dimensions = number;
+	vector.data = malloc(sizeof(double) * number);
+	for (int i = 0; i < number; i++) { vector.data[i] = 0; }
+	return vector
+}
+
 //get a row of a matrix (does not malloc)
 Vector get_row(Matrix matrix, int row_num) {
 	Vector output;
@@ -272,8 +281,24 @@ Vector find_eigenvalues(Matrix matrix, int iterations) {
 	return eigenvalues;
 }
 
+//solve a linear equation with matrix and vector
+Vector solve_linear(Matrix matrix, Vector vector) {
+	Vector output;
+	output.dimensions = vector.dimensions;
+	output.data = malloc(sizeof(double*) * output.dimensions);
+	
+	for (int i = 0; i < vector.dimensions; i++) {
+		output.data[i] = vector.data[i];
+		for (int j = 0; j < i; j++) { output.data[i] -= matrix.data[i][j] * output.data[j]; }
+		output.data[i] /= matrix.data[i][i]; //does not work if 0 on diagonal
+	}
+}
+
 //solve the linear systems to get eigenvectors
 Vector *find_eigenvectors(Matrix matrix, Vector eigenvalues) {
+	Vector *eigenvectors = malloc(sizeof(Vector) * eigenvalues.dimensions);
+	Vector zero_vector = zeros(matrix.n);
+	
 	for (int i = 0; i < eigenvalues.dimensions; i++) {
 		Matrix temp_matrix = copy_matrix(matrix);
 		Matrix id_matrix = eye(matrix.n);
@@ -282,6 +307,9 @@ Vector *find_eigenvectors(Matrix matrix, Vector eigenvalues) {
 		multiply_by_scalar_in_place(id_matrix, eigenvalue);
 		subtract_matrix_in_place(temp_matrix, id_matrix);
 		
-		
+		eigenvectors[i] = solve_linear(temp_matrix, zero_vector);
 	}
+	
+	free(zero_vector);
+	return eigenvectors;
 }
