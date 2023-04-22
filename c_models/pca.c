@@ -65,7 +65,7 @@ Vector zeros(int number) {
 	vector.dimensions = number;
 	vector.data = malloc(sizeof(double) * number);
 	for (int i = 0; i < number; i++) { vector.data[i] = 0; }
-	return vector
+	return vector;
 }
 
 //get a row of a matrix (does not malloc)
@@ -96,7 +96,7 @@ void free_matrix(Matrix to_free) {
 
 //free a vector
 void free_vector(Vector to_free) {
-	free(to_free.data)
+	free(to_free.data);
 }
 
 //scale a vector in place
@@ -125,7 +125,7 @@ void multiply_in_place(Matrix initial, Matrix to_multiply) {
 		for (int j = 0; j < initial.dimensions; j++) {
 			double row = 0;
 			for (int k = 0; k < initial.dimensions; k++) { row += initial.data[i][k] * to_multiply.data[k][j]; }
-			intial.data[i][j] = row;
+			initial.data[i][j] = row;
 		}
 	}
 }
@@ -175,7 +175,7 @@ QRDecomposition qr_decompose(Matrix to_decompose) {
 		}
 		
 		for (int j = 0; j < q.dimensions; j++) {
-			q.data[j][i] = to_decompose_i.data[k];
+			q.data[j][i] = to_decompose_i.data[j];
 		}
 		Vector q_i = get_row(q, i);
 		double magnitude = pow(dot(q_i, q_i), 0.5);
@@ -228,15 +228,15 @@ void normalize_matrix(Matrix matrix) {
 }
 
 //find the covariance between two dimensions of a matrix
-double find_covariance(Matrix matrix, int dimension1; int dimension2; double mean1; double mean2;) {
+double find_covariance(Matrix matrix, int dimension1, int dimension2, double mean1, double mean2) {
 	double covariance = 0;
-	for (int = 0; i < matrix.n; i++) {
+	for (int i = 0; i < matrix.n; i++) {
 		double temp_term = matrix.data[i][dimension1];
 		temp_term *= matrix.data[i][dimension2];
 		covariance += temp_term;
 	}
 	covariance /= matrix.n-1;
-	return covariance
+	return covariance;
 }
 
 //find the covariance matrix of a matrix
@@ -263,9 +263,19 @@ Matrix find_cov_matrix(Matrix matrix){
 //find eigenvalues of matrix using qr decomposition
 Vector find_eigenvalues(Matrix matrix, int iterations) {
 	Matrix qq = eye(matrix.n);
+	Matrix temp_matrix = copy_matrix(matrix);
+	QRDecomposition decomposition;
+	QRDecomposition previous;
+	int is_previous = 0;
+	
 	for (int i = 0; i < iterations; i++) {
-		QRDecomposition decomposition = qr_decompose(temp_matrix);
+		decomposition = qr_decompose(temp_matrix);
+		
+		if (is_previous) { free_matrix(previous.q); free_matrix(previous.r); }
+		
 		multiply_in_place(qq, decomposition.q);
+		previous = decomposition;
+		is_previous = 1;
 	}
 	
 	Vector eigenvalues;
@@ -276,7 +286,7 @@ Vector find_eigenvalues(Matrix matrix, int iterations) {
 	}
 	
 	free_matrix(qq);
-	free_matrix(decomposition.q);
+	//free_matrix(decomposition.q);
 	free_matrix(decomposition.r);
 	return eigenvalues;
 }
@@ -292,6 +302,7 @@ Vector solve_linear(Matrix matrix, Vector vector) {
 		for (int j = 0; j < i; j++) { output.data[i] -= matrix.data[i][j] * output.data[j]; }
 		output.data[i] /= matrix.data[i][i]; //does not work if 0 on diagonal
 	}
+	return output;
 }
 
 //solve the linear systems to get eigenvectors
@@ -310,6 +321,6 @@ Vector *find_eigenvectors(Matrix matrix, Vector eigenvalues) {
 		eigenvectors[i] = solve_linear(temp_matrix, zero_vector);
 	}
 	
-	free(zero_vector);
+	free_vector(zero_vector);
 	return eigenvectors;
 }
