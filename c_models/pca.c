@@ -124,7 +124,7 @@ void subtract_matrix_in_place(Matrix initial, Matrix to_subtract) {
 	}
 }
 
-//multiply a matrix by another in-place
+//multiply a matrix by another in-place (ONLY USE ON EQUALLY-SIZED MATRICES)
 void multiply_in_place(Matrix initial, Matrix to_multiply) {
 	for (int i = 0; i < initial.n; i++) {
 		for (int j = 0; j < initial.dimensions; j++) {
@@ -344,7 +344,7 @@ void restrict_to_top(Vector vector, int k) {
 		for (int j = i+1; j < vector.dimensions; j++) {
 			if (vector.data[j] > vector.data[i]) { max = vector.data[j]; max_index = j; }
 		}
-		vector_data[max_index] = vector.data[i];
+		vector.data[max_index] = vector.data[i];
 		vector.data[i] = max;
 	}
 	vector.dimensions = k;
@@ -352,10 +352,28 @@ void restrict_to_top(Vector vector, int k) {
 
 //perform the pca transform on the matrix
 Matrix pca_transform(Matrix initial, int dimensions) {
-	covariance_matrix = find_covariance_matrix(initial); //find cov matrix
+	Matrix covariance_matrix = find_cov_matrix(initial); //find cov matrix
 	
 	normalize_matrix(covariance_matrix); //normalize each column in matrix
 	Vector eigenvalues = find_eigenvalues(covariance_matrix, ITERS); //find eigenvalues
 	restrict_to_top(eigenvalues, dimensions); //restrict eigenvalue vector to top `dimensions` values
 	Vector *eigenvectors = find_eigenvectors(covariance_matrix, eigenvalues); //find eigenvectors with given eigenvalues
+	
+	//obtain the projection matrix
+	Matrix projection_matrix;
+	projection_matrix.n = covariance_matrix.n;
+	projection_matrix.dimensions = dimensions;
+	projection_matrix.data = malloc(sizeof(double*) * covariance_matrix.n);
+	for (int i = 0; i < dimensions; i++) { projection_matrix.data[i] = eigenvectors[i].data; }
+	
+	Matrix output = multiply_matrices(initial, projection_matrix);
+	
+	//deal with memory management
+	free_matrix(projection_matrix); //this also frees each vector in the eigenvectors pointer array
+	free_matrix(covariance_matrix);
+	free_vector(eigenvalues);
+	
+	return output;
 }
+
+int main() { return 0; }
