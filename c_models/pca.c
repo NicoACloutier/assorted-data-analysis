@@ -2,6 +2,8 @@
 #include<stdio.h>
 #include<math.h>
 
+#define ITERS 500000
+
 //PRINCIPAL COMPONENT ANALYSIS (unfinished)
 
 typedef struct Matrix {
@@ -29,6 +31,7 @@ Matrix multiply_matrices(Matrix matrix1, Matrix matrix2) {
 	
 	output.data = malloc(sizeof(double*) * output.n);
 	for (int i = 0; i < output.n; i++) {
+		output.data[i] = malloc(sizeof(double) * output.dimensions);
 		for (int j = 0; j < output.dimensions; j++) {
 			double row = 0;
 			for (int k = 0; k < matrix1.dimensions; k++) { row += matrix1.data[i][k] * matrix2.data[k][j]; }
@@ -45,6 +48,7 @@ Matrix copy_matrix(Matrix to_copy) {
 	output.dimensions = to_copy.dimensions;
 	output.data = malloc(sizeof(double*) * output.n);
 	for (int i = 0; i < output.n; i++) {
+		output.data[i] = malloc(sizeof(double) * output.dimensions);
 		for (int j = 0; j < output.dimensions; j++) { output.data[i][j] = to_copy.data[i][j]; }
 	}
 	return output;
@@ -92,6 +96,7 @@ void free_matrix(Matrix to_free) {
 	for (int i = 0; i < to_free.n; i++) {
 		free(to_free.data[i]);
 	}
+	free(to_free.data);
 }
 
 //free a vector
@@ -144,6 +149,7 @@ Matrix eye(int number) {
 	output.dimensions = number;
 	output.data = malloc(sizeof(double*) * number);
 	for (int i = 0; i < number; i++) {
+		output.data[i] = malloc(sizeof(double) * number);
 		for (int j = 0; j < number; j++) {
 			output.data[i][j] = (i==j);
 		}
@@ -160,13 +166,14 @@ QRDecomposition qr_decompose(Matrix to_decompose) {
 	r.n = to_decompose.n;
 	r.dimensions = to_decompose.dimensions;
 	r.data = malloc(sizeof(double*) * r.n);
+	for (int i = 0; i < r.n; i++) { r.data[i] = malloc(sizeof(double) * r.dimensions); }
 	
 	for (int i = 0; i < to_decompose.dimensions; i++) {
 		Vector to_decompose_i = get_column(to_decompose, i);
 		for (int j = 0; j < i; j++) {
 			Vector to_decompose_vec = get_row(to_decompose, i);
 			Vector q_vec = get_row(q, j);
-			r.data[i][j] = dot(to_decompose_vec, q_vec);
+			r.data[j][i] = dot(to_decompose_vec, q_vec);
 			
 			Vector q_j = get_column(q, j);
 			scale_in_place(q_j, r.data[i][j]);
@@ -252,6 +259,7 @@ Matrix find_cov_matrix(Matrix matrix){
 	cov.n = matrix.dimensions;
 	cov.data = malloc(sizeof(double*) * cov.n);
 	for (int i = 0; i < cov.dimensions; i++) {
+		cov.data[i] = malloc(sizeof(double) * cov.dimensions);
 		for (int j = 0; j < cov.dimensions; j++) {
 			cov.data[i][j] = find_covariance(matrix, i, j, means[i], means[j]);
 		}
@@ -265,29 +273,32 @@ Vector find_eigenvalues(Matrix matrix, int iterations) {
 	Matrix qq = eye(matrix.n);
 	Matrix temp_matrix = copy_matrix(matrix);
 	QRDecomposition decomposition;
-	QRDecomposition previous;
+	QRDecomposition previous_decomp;
+	Matrix previous_matrix;
 	int is_previous = 0;
 	
 	for (int i = 0; i < iterations; i++) {
 		decomposition = qr_decompose(temp_matrix);
 		
-		if (is_previous) { free_matrix(previous.q); free_matrix(previous.r); }
+		if (is_previous) { free_matrix(previous_decomp.q); free_matrix(previous_decomp.r); free_matrix(previous_matrix); }
 		
-		multiply_in_place(qq, decomposition.q);
-		previous = decomposition;
+		temp_matrix = multiply_matrices(decomposition.r, decomposition.q);
+		previous_decomp = decomposition;
+		previous_matrix = temp_matrix;
 		is_previous = 1;
 	}
 	
 	Vector eigenvalues;
-	eigenvalues.dimensions = qq.n;
-	eigenvalues.data = malloc(sizeof(double*) * qq.n);
+	eigenvalues.dimensions = temp_matrix.n;
+	eigenvalues.data = malloc(sizeof(double*) * temp_matrix.n);
 	for (int i = 0; i < eigenvalues.dimensions; i++) {
-		eigenvalues.data[i] = qq.data[i][i];
+		eigenvalues.data[i] = temp_matrix.data[i][i];
 	}
 	
 	free_matrix(qq);
-	//free_matrix(decomposition.q);
+	free_matrix(decomposition.q);
 	free_matrix(decomposition.r);
+	free_matrix(temp_matrix);
 	return eigenvalues;
 }
 
@@ -323,4 +334,28 @@ Vector *find_eigenvectors(Matrix matrix, Vector eigenvalues) {
 	
 	free_vector(zero_vector);
 	return eigenvectors;
+}
+
+//restrict a vector to its top  `k` values
+void restrict_to_top(Vector vector, int k) {
+	for (int i = 0; i < k; i++) {
+		int max_index = i;
+		double max = vector.data[i];
+		for (int j = i+1; j < vector.dimensions; j++) {
+			if (vector.data[j] > vector.data[i]) { max = vector.data[j]; max_index = j; }
+		}
+		vector_data[max_index] = vector.data[i];
+		vector.data[i] = max;
+	}
+	vector.dimensions = k;
+}
+
+//perform the pca transform on the matrix
+Matrix pca_transform(Matrix initial, int dimensions) {
+	covariance_matrix = find_covariance_matrix(initial); //find cov matrix
+	
+	normalize_matrix(covariance_matrix); //normalize each column in matrix
+	Vector eigenvalues = find_eigenvalues(covariance_matrix, ITERS); //find eigenvalues
+	restrict_to_top(eigenvalues, dimensions); //restrict eigenvalue vector to top `dimensions` values
+	Vector *eigenvectors = find_eigenvectors(covariance_matrix, eigenvalues); //find eigenvectors with given eigenvalues
 }
