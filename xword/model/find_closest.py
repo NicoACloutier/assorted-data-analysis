@@ -1,13 +1,15 @@
 import pandas as pd
 import numpy as np
 import gensim
+import string
+import nltk
 import re
 
-def delete_punctuation(string: str) -> str:
+def delete_punctuation(input_string: str) -> str:
     '''
-    Delete punctuation from string
+    Delete punctuation from input string
     '''
-    return ''.join(char for char in string if char not in string.punctuation)
+    return ''.join(char for char in input_string if char not in string.punctuation)
 
 def clean(text: str) -> str:
     '''
@@ -25,7 +27,7 @@ def filter_df(df: pd.DataFrame, length: int, filled_in: str) -> pd.DataFrame:
     '''
     df = df[df['Answer'].apply(len) == length]
     fulfill_string_list = [re.match(filled_in, answer) for answer in list(df['Answer'])]
-    df = df[fulfill_string_list]
+    df = df[np.array(fulfill_string_list).astype(bool)]
     return df
 
 def find_rep(clue: str, model: gensim.models.Word2Vec) -> np.ndarray:
@@ -40,4 +42,4 @@ def find_closest(length: int, filled_in: str, clue: str, model: gensim.models.Wo
     representation = find_rep(clue, model)
     clue_representations = np.array([find_rep(temp_clue, model) for temp_clue in df['Clue']])
     rankings = sorted(np.linalg.norm(clue_representations - representation, axis=1))
-    return rankings[n:]
+    return rankings if len(rankings) < n else rankings[:n]
