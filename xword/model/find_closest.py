@@ -1,45 +1,35 @@
+import sentence_transformers, nltk
+import string, pickle
 import pandas as pd
 import numpy as np
-import gensim
-import string
-import nltk
-import re
 
-def delete_punctuation(input_string: str) -> str:
-    '''
-    Delete punctuation from input string
-    '''
+MODEL = 'bert-base-uncased'
+DATA_FILE = '../data/xword.csv'
+EMBED_FILE = '../data/embeddings'
+TEST_WORDS = {'____': 'Capital city near the Nile Delta.'}
+
+def delete_punctuation(input_string):
     return ''.join(char for char in input_string if char not in string.punctuation)
 
-def clean(text: str) -> str:
-    '''
-    Remove stopwords from text, put in lowercase, and delete punctuation
-    '''
+def clean(text):
     text = f' {text} '
     text = delete_punctuation(text.lower())
     for stopword in nltk.corpus.stopwords.words('english'):
         text = text.replace(f' {stopword} ', ' ')
     return text
 
-def filter_df(df: pd.DataFrame, length: int, filled_in: str) -> pd.DataFrame:
-    '''
-    Filter values in a `DataFrame` to those of a particular length satisfying a particular filled in string.
-    '''
-    df = df[df['Answer'].apply(len) == length]
-    fulfill_string_list = [re.match(filled_in, answer) for answer in list(df['Answer'])]
-    df = df[np.array(fulfill_string_list).astype(bool)]
-    return df
+def find_closest(model, clue, wordlists, embeddings):
+    embedding = model.encode(clue)
+    nearest = np.argmin(np.linalg.norm(embeddings - embedding))
+    return wordlists[nearest]
 
-def find_rep(clue: str, model: gensim.models.Word2Vec) -> np.ndarray:
-    return np.mean([model.wv[word] for word in clue.split()])
+def main():
+    df = pd.read_csv(DATA_FILE)
+    model = sentence_transformers.SentenceTransformer(MODEL)
+    with open(EMBED_FILE, 'rb') as f:
+        embeddings = pickle.loads(f.read())
+    for test_word in TEST_WORDS:
+        find_closest(model, TEST_WORDS[test_word], list(df['Clue']), embeddings)
 
-def find_closest(length: int, filled_in: str, clue: str, model: gensim.models.Word2Vec, n: int, df: pd.DataFrame) -> np.ndarray:
-    '''
-    Find the `n` closest words.
-    '''
-    clue = clean(clue)
-    df = filter_df(df, length, filled_in)
-    representation = find_rep(clue, model)
-    clue_representations = np.array([find_rep(temp_clue, model) for temp_clue in df['Clue']])
-    rankings = sorted(np.linalg.norm(clue_representations - representation, axis=1))
-    return rankings if len(rankings) < n else rankings[:n]
+if __name__ == '__main__':
+    main()
