@@ -61,13 +61,13 @@ def find_rep_index(representation: str, number: int, line_length: int) -> int:
         current_char += 1
     return current_char
 
-def find_number_info(representation: str, number: int, down: bool) -> str:
+def find_number_info(representation: str, number: int, across: bool) -> str:
     '''
     Find a word place within a crossword representation string.
     Arguments:
         `representation: str`: the string representation of a crossword board.
         `number: int`: the number of the word.
-        `down: bool`: `False` if across, `True` if down.
+        `across: bool`: whether the word goes across.
     Returns:
         `str`: the representation of the word alone.
     '''
@@ -106,7 +106,7 @@ def change_rep(representation: str, numbers: list[int], i: int, line_length: int
         `numbers: list[int]`: the list of numbers in the prompt list
         `i: int`: the index of the prompt in the prompt list.
         `line_length: int`: the length of a line.
-        `across: bool`: whether the word goes across
+        `across: bool`: whether the word goes across.
     Returns:
         `str`: the updated representation string.
         `bool`: whether the string was replaced successfully.
@@ -127,6 +127,12 @@ def change_rep(representation: str, numbers: list[int], i: int, line_length: int
 
 def filter_wordlist(word_rep: str, wordlist: list[str]) -> list[str]:
     '''
+    Filter a wordlist given a word representation pattern.
+    Arguments:
+        `word_rep: str`: the word representation pattern.
+        `wordlist: list[str]`: a list of possible words given as answers.
+    Returns:
+        `list[str]`: a list of words that fit the pattern.
     '''
     wordlist = [word for word in wordlist if len(word) == len(word_rep)]
     for i, char in enumerate(word_rep):
@@ -134,9 +140,23 @@ def filter_wordlist(word_rep: str, wordlist: list[str]) -> list[str]:
             wordlist = [word for word in wordlist if word[i] == char]
     return wordlist
 
-def update_rep(representation: str, current_char: int, wordlist: list[str], answers: dict[int, str], prompts: dict[int, str]
+def update_rep(representation: str, current_char: int, wordlist: list[str], answers: dict[int, str], prompts: dict[int, str],
                number: int, across: bool, line_length: int) -> tuple[dict[int, str], dict[int, str], str]:
     '''
+    Update a representation for patterns with only one possibility in the reference corpus.
+    Arguments:
+        `representation: str`: the string representation of a crossword board.
+        `current_char: int`: the index of the current character within the representation.
+        `wordlist: list[str]`: a list of possible words given as answers.
+        `answers: dict[int, str]`: the answers.
+        `prompts: dict[int, str]`: the prompts.
+        `number: int`: the number of a word in the representation.
+        `across: bool`: whether the word goes across.
+        `line_length: int`: the length of a line.
+    Returns:
+        `dict[int, str]`: the updated prompts.
+        `dict[int, str]`: the updates answers.
+        `str`: the updated representation.
     '''
     word_rep = ''
     while current_char < len(representation) and representation[current_char] != '!':
@@ -157,8 +177,8 @@ def filter_unique(representation: str, wordlist: list[str], down_prompts: dict[i
     '''
     Filter out words with unique possible answers given the reference list and update answers and representation accordingly.
     Arguments:
-        `representation: str`:
-        `wordlist: list[str]`: 
+        `representation: str`: the string representation of a crossword board.
+        `wordlist: list[str]`: a list of possible words given as answers.
         `across_prompts: dict[int, str]`: the prompts going down.
         `down_prompts: dict[int, str]`: the prompts going across.
         `across_answers: dict[int, str]`: the answers going down.
@@ -180,8 +200,36 @@ def filter_unique(representation: str, wordlist: list[str], down_prompts: dict[i
         if char != '!' and down_word:
             down_prompts, down_answers, temp_rep = update_rep(temp_rep, i, wordlist, down_prompts, down_answers, number, False, line_length)
     for i in range(1, len(temp_rep)//line_length):
-        representation = temp_rep[i*line_length:] + '\n' + temp_rep[:i*line_length]
+        temp_rep = temp_rep[i*line_length+i:] + '\n' + temp_rep[:i*line_length+i]
+    representation = temp_rep
     return down_answers, across_answers, down_prompts, across_prompts, representation
+
+def get_none(representation: str, wordlist: list[str]) -> tuple[dict[int, str], dict[int, str], dict[int, str], dict[int, str]]:
+    '''
+    Arguments:
+        `representation: str`: the string representation of a crossword board.
+        `wordlist: list[str]`: a list of possible words given as answers.
+    Returns:
+        `dict[int, str]`: the nones going down.
+        `dict[int, str]`: the nones going across.
+        `dict[int, str]`: the updated prompts going down.
+        `dict[int, str]`: the updates prompts going across.
+    '''
+    across_nones, down_nones = dict(), dict()
+    line_length, temp_rep = representation.index('\n'), representation.replace('\n', '')
+    number = 0
+    for i, char in enumerate(representation):
+        across_word, down_word = is_across_word_start(temp_rep, i, line_length), is_down_word_start(temp_rep, i, line_length)
+        number += int(across_word or down_word)
+        if char != '!' and across_word:
+            if len(filter_wordlist(find_number_info(representation, number, True), wordlist)) == 0:
+                across_nones[number] = across_prompts[number]
+                del across_prompts[number]
+        if char != '!' and down_word:
+            if len(filter_wordlist(find_number_info(representation, number, False), wordlist)) == 0:
+                down_nones[number] = downs_prompts[number]
+                del down_promts[number]
+    return down_nones, across_nones, down_prompts, across_prompts
 
 def get_closest_words(representation: str, down_prompts: dict[int, str], across_prompts: dict[int, str], worldist: list[str], 
                         across_answers: dict[int, str], down_answers: dict[int, str]) -> tuple[dict[int, str], dict[int, str], dict[int, str], dict[int, str], str]:
@@ -241,10 +289,13 @@ def solve_board(representation: str, down_prompts: dict[int, str], across_prompt
     while (down_prompts or across_prompts) and current_length != previous_length:
         down_answers, across_answers, down_prompts, across_prompts, representation = get_closest_words(representation, down_prompts, across_prompts, wordlist)
         down_answers, across_answers, down_prompts, across_prompts, representation = filter_unique(representation, wordlist, down_prompts, across_prompts, down_answers, across_answers)
-        none_list, down_prompts, across_prompts = get_none(representation, wordlist, down_prompts, across_prompts) #TODO
+        down_nones, across_nones, down_prompts, across_prompts = get_none(representation, wordlist, down_prompts, across_prompts)
         previous_length = current_length
         current_length = len(down_answers) + len(across_answers)
-    down_prompts, across_prompts = repopulate_prompts(none_list) #TODO
+    for prompt in down_nones:
+        down_prompts[prompt] = down_nones[prompt]
+    for prompt in across_prompts:
+        across_prompts[prompt] = across_nones[prompt]
     if down_prompts or across_prompts:
         representation, down_answers, across_answers = model_fill(representation, down_prompts, across_prompts) #TODO
     return down_answers, across_answers
