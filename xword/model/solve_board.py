@@ -1,5 +1,6 @@
 import sentence_transformers, nltk
 import string, pickle, collections, typing
+import model_fill
 import pandas as pd
 import numpy as np
 
@@ -60,6 +61,21 @@ def find_rep_index(representation: str, number: int, line_length: int) -> int:
             num_count += 1
         current_char += 1
     return current_char
+
+def filter_wordlist(word_rep: str, wordlist: list[str]) -> list[str]:
+    '''
+    Filter a wordlist given a word representation pattern.
+    Arguments:
+        `word_rep: str`: the word representation pattern.
+        `wordlist: list[str]`: a list of possible words given as answers.
+    Returns:
+        `list[str]`: a list of words that fit the pattern.
+    '''
+    wordlist = [word for word in wordlist if len(word) == len(word_rep)]
+    for i, char in enumerate(word_rep):
+        if char != '_':
+            wordlist = [word for word in wordlist if word[i] == char]
+    return wordlist
 
 def find_number_info(representation: str, number: int, across: bool) -> str:
     '''
@@ -125,20 +141,26 @@ def change_rep(representation: str, numbers: list[int], i: int, line_length: int
         char_index += 1 if across else line_length
     return representation, !bad
 
-def filter_wordlist(word_rep: str, wordlist: list[str]) -> list[str]:
+def model_fill(clue: str, clue_list: list[str]) -> str:
     '''
-    Filter a wordlist given a word representation pattern.
+    Probabalistically fill unfilled characters in a clue given a prompt list.
     Arguments:
-        `word_rep: str`: the word representation pattern.
-        `wordlist: list[str]`: a list of possible words given as answers.
+        `clue: str`: the clue as it currently is, with letters not yet filled in.
+        `clue_list: list[str]`: the list of representations of clues.
     Returns:
-        `list[str]`: a list of words that fit the pattern.
+        `str`: the filled prompt.
     '''
-    wordlist = [word for word in wordlist if len(word) == len(word_rep)]
-    for i, char in enumerate(word_rep):
-        if char != '_':
-            wordlist = [word for word in wordlist if word[i] == char]
-    return wordlist
+    temp_prompt_list = [re.search(clue.replace('_', '.'), prompt) for prompt in clue_list]
+    temp_prompt_list = [prompt.group(0) for prompt in temp_prompt_list if prompt]
+    if len(temp_prompt_list) == 0:
+        clue1, clue2 = clue[:len(clue)//2], clue[len(clue)//2:]
+        return model_fill(clue1, clue_list) + model_fill(clue2, clue_list)
+    for i, char in enumerate(clue):
+        if char == '_':
+            char_list = [prompt[i] for prompt in temp_prompt_list]
+            char_counter = collections.Counter(char_list)
+            clue[i] = max(char_counter, key=lambda x: char_counter[x])
+    return clue
 
 def update_rep(representation: str, current_char: int, wordlist: list[str], answers: dict[int, str], prompts: dict[int, str],
                number: int, across: bool, line_length: int) -> tuple[dict[int, str], dict[int, str], str]:
@@ -297,5 +319,5 @@ def solve_board(representation: str, down_prompts: dict[int, str], across_prompt
     for prompt in across_prompts:
         across_prompts[prompt] = across_nones[prompt]
     if down_prompts or across_prompts:
-        representation, down_answers, across_answers = model_fill(representation, down_prompts, across_prompts) #TODO
+        representation, down_answers, across_answers = model_fill(representation, wordlist)
     return down_answers, across_answers
