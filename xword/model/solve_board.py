@@ -1,6 +1,5 @@
 import sentence_transformers, nltk
 import string, pickle, collections, typing
-import model_fill
 import pandas as pd
 import numpy as np
 
