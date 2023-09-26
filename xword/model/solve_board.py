@@ -64,7 +64,7 @@ def find_rep_index(representation: str, number: int, line_length: int) -> int:
         if (representation[current_char] not in ['!', '\n']) and (is_across_word_start(representation, current_char, line_length) or is_down_word_start(representation, current_char, line_length)):
             num_count += 1
         current_char += 1
-    return current_char
+    return current_char-1
 
 def filter_wordlist(word_rep: str, wordlist: list[str]) -> list[str]:
     '''
@@ -96,6 +96,8 @@ def find_word_rep(representation: str, index: int, across: bool, line_length: in
     while index < len(representation) and representation[index] != '!':
         word_rep += representation[index]
         index += 1 if across else line_length
+        if across and index % line_length == 0:
+            break
     return word_rep
 
 def find_number_info(representation: str, number: int, across: bool) -> str:
@@ -242,8 +244,10 @@ def filter_unique(representation: str, wordlist: list[str], down_prompts: dict[i
             across_prompts, across_answers, temp_rep = update_rep(temp_rep, i, wordlist, across_prompts, across_answers, number, True, line_length)
         if char != '!' and down_word:
             down_prompts, down_answers, temp_rep = update_rep(temp_rep, i, wordlist, down_prompts, down_answers, number, False, line_length)
+    print(temp_rep)
     for i in range(1, len(temp_rep)//line_length):
         temp_rep = temp_rep[i*line_length+i:] + '\n' + temp_rep[:i*line_length+i]
+    print(temp_rep)
     representation = temp_rep
     return down_answers, across_answers, down_prompts, across_prompts, representation
 
