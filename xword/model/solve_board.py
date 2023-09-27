@@ -149,8 +149,8 @@ def change_rep(representation: str, numbers: list[int], i: int, line_length: int
         `bool`: whether the string was replaced successfully.
         `int`: the number of the word.
     '''
+    representation = representation.replace('\n', '')
     char_index = find_rep_index(representation, numbers[i], line_length)
-    print(char_index)
     word = find_word_rep(representation, char_index, across, line_length)
     bad = False
     for char in answer:
@@ -164,6 +164,8 @@ def change_rep(representation: str, numbers: list[int], i: int, line_length: int
     for char in answer:
         representation = representation[:char_index] + char + representation[char_index+1:]
         char_index += 1 if across else line_length
+    for i in range(1, len(representation)//line_length):
+        representation = representation[:i*line_length+(i-1)] + '\n' + representation[i*line_length+(i-1):]
     return representation, not bad, numbers[i]
 
 def model_fill(clue: str, clue_list: list[str]) -> str:
