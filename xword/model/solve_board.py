@@ -134,7 +134,7 @@ def find_closest(model: sentence_transformers.SentenceTransformer, clue: str, wo
     word = max([wordlist[ind] for ind in nearest], key=item_counter.get)
     return word if item_counter[word] > 1 else None, item_counter[word]
 
-def change_rep(representation: str, numbers: list[int], i: int, line_length: int, across: bool, answer: str) -> tuple[str, bool, int]:
+def change_rep(representation: str, numbers: list[int], i: int, line_length: int, across: bool, answer: str) -> tuple[str, bool, typing.Optional[int]]:
     '''
     Change the representation string, ensuring no changes are made that conflict with past changes.
     Arguments:
@@ -159,14 +159,14 @@ def change_rep(representation: str, numbers: list[int], i: int, line_length: int
             break
         char_index += 1 if across else line_length
     if bad:
-        return representation, not bad, numbers[i]
+        return representation, not bad, numbers[i] if i < len(numbers) else None
     char_index -= len(word) if across else line_length * len(word)
     for char in answer:
         representation = representation[:char_index] + char + representation[char_index+1:]
         char_index += 1 if across else line_length
     for i in range(1, len(representation)//line_length):
         representation = representation[:i*line_length+(i-1)] + '\n' + representation[i*line_length+(i-1):]
-    return representation, not bad, numbers[i]
+    return representation, not bad, numbers[i] if i < len(numbers) else None
 
 def model_fill(clue: str, clue_list: list[str]) -> str:
     '''
@@ -214,7 +214,9 @@ def update_rep(representation: str, current_char: int, wordlist: list[str], answ
     current_char -= len(word_rep) * (1 if across else line_length)
     if '_' in word_rep:
         possibilities = list(set(filter_wordlist(word_rep, wordlist)))
-        if len(possibilities) == 1:
+        print(prompts)
+        print(number)
+        if len(possibilities) == 1 and number in prompts:
             answers[number] = possibilities[0]
             del prompts[number]
             for i, char in enumerate(possibilities[0]):
@@ -246,13 +248,11 @@ def filter_unique(representation: str, wordlist: list[str], down_prompts: dict[i
         across_word, down_word = is_across_word_start(temp_rep, i, line_length), is_down_word_start(temp_rep, i, line_length)
         number += int(across_word or down_word)
         if char != '!' and across_word:
-            across_prompts, across_answers, temp_rep = update_rep(temp_rep, i, wordlist, across_prompts, across_answers, number, True, line_length)
+            across_prompts, across_answers, temp_rep = update_rep(temp_rep, i, wordlist, across_answers, across_prompts, number, True, line_length)
         if char != '!' and down_word:
-            down_prompts, down_answers, temp_rep = update_rep(temp_rep, i, wordlist, down_prompts, down_answers, number, False, line_length)
-    print(temp_rep)
+            down_prompts, down_answers, temp_rep = update_rep(temp_rep, i, wordlist, down_answers, down_prompts, number, False, line_length)
     for i in range(1, len(temp_rep)//line_length):
-        temp_rep = temp_rep[i*line_length+i:] + '\n' + temp_rep[:i*line_length+i]
-    print(temp_rep)
+        temp_rep = temp_rep[:i*line_length+i] + '\n' + temp_rep[i*line_length+i:]
     representation = temp_rep
     return down_answers, across_answers, down_prompts, across_prompts, representation
 
@@ -271,8 +271,6 @@ def get_none(representation: str, wordlist: list[str], down_prompts: dict[int, s
     '''
     across_nones, down_nones = dict(), dict()
     line_length, temp_rep = representation.index('\n'), representation.replace('\n', '')
-    print(representation)
-    print(line_length)
     number = 0
     for i, char in enumerate(representation):
         across_word, down_word = is_across_word_start(temp_rep, i, line_length), is_down_word_start(temp_rep, i, line_length)
@@ -319,12 +317,12 @@ def get_closest_words(representation: str, down_prompts: dict[int, str], across_
         temp_down_answers = [answer for answer in down_answers if down_answers[answer][1] == x]
         for i, word in enumerate(temp_down_answers):
             representation, good, number = change_rep(representation, down_numbers, i, line_length, False, word)
-            if good:
-                down_answers[number] = word
-                del down_prompts[number]
+            if good and number in down_prompts:
+                    down_answers[number] = word
+                    del down_prompts[number]
         for i, word in enumerate(temp_across_answers):
             representation, good, number = change_rep(representation, across_numbers, i, line_length, True, word)
-            if good:
+            if good and number in across_prompts:
                 across_answers[number] = word
                 del across_prompts[number]
     return down_answers, across_answers, down_prompts, across_prompts, representation
