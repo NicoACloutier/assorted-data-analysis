@@ -81,6 +81,17 @@ def filter_wordlist(word_rep: str, wordlist: list[str]) -> list[str]:
             wordlist = [word for word in wordlist if word[i] == char]
     return wordlist
 
+def word_fits_clue(word_rep: str, word_clue: str) -> bool:
+    '''
+    Determine whether or not a word representation fits a clue.
+    Arguments:
+        `word_rep: str`: the potential representation.
+        `word_clue: str`: the given clue representation.
+    Returns:
+        `bool`: whether the representation and clue match.
+    '''
+    return len(word_rep) == len(word_clue) and not any(char not in ['_', word_rep[i]] for i, char in enumerate(word_clue))
+
 def find_word_rep(representation: str, index: int, across: bool, line_length: int) -> str:
     '''
     Find the representation of a word if its index is already known.
@@ -116,22 +127,27 @@ def find_number_info(representation: str, number: int, across: bool) -> str:
     current_char = find_rep_index(representation, number, line_length)
     return find_word_rep(representation, current_char, across, line_length)
 
-def find_closest(model: sentence_transformers.SentenceTransformer, clue: str, wordlist: list[str], embeddings: np.ndarray) -> tuple[typing.Optional[str], int]:
+def find_closest(model: sentence_transformers.SentenceTransformer, clue: str, wordlist: list[str], embeddings: np.ndarray, prompt: str) -> tuple[typing.Optional[str], int]:
     '''
     Find the closest embeddings to a given prompt. Finds `NUM_WORDS` closest. If multiple are the same string, return string. Otherwise, return `None`.
     Arguments:
         `model: sentence_transformers.SentenceTransformer`: the sentence transformer model used for embedding generation.
         `clue: str`: the word clue in string form.
         `wordlist: str`: the list of words in the references.
-        `embeddings: np.ndarray`: the pre-generated embeddings for the prompts in 
+        `embeddings: np.ndarray`: the pre-generated embeddings for the prompts in pre-loaded corpus.
+        `prompt: str`: the sentence prompt for the given word.
     Returns:
         `typing.Optional[str]`: the found string if multiple among `NUM_WORDS` are the same. Otherwise, `None`.
         `int`: the number of words that were found that were the same.
     '''
-    embedding = model.encode(clue)
+    indeces = [i for i, word in enumerate(wordlist) if word_fits_clue(word, clue)]
+    embeddings = np.array([embeddings[i] for i in indeces])
+    if len(embeddings) == 0:
+        return None, 0
+    embedding = model.encode(prompt)
     nearest = np.linalg.norm(embeddings - embedding, axis=1).argsort()[:NUM_WORDS]
-    item_counter = collections.Counter([wordlist[ind] for ind in nearest])
-    word = max([wordlist[ind] for ind in nearest], key=item_counter.get)
+    item_counter = collections.Counter([wordlist[indeces[ind]] for ind in nearest])
+    word = max([wordlist[indeces[ind]] for ind in nearest], key=item_counter.get)
     return word if item_counter[word] > 1 else None, item_counter[word]
 
 def change_rep(representation: str, numbers: list[int], i: int, line_length: int, across: bool, answer: str) -> tuple[str, bool, typing.Optional[int]]:
@@ -214,8 +230,6 @@ def update_rep(representation: str, current_char: int, wordlist: list[str], answ
     current_char -= len(word_rep) * (1 if across else line_length)
     if '_' in word_rep:
         possibilities = list(set(filter_wordlist(word_rep, wordlist)))
-        print(prompts)
-        print(number)
         if len(possibilities) == 1 and number in prompts:
             answers[number] = possibilities[0]
             del prompts[number]
@@ -305,25 +319,25 @@ def get_closest_words(representation: str, down_prompts: dict[int, str], across_
     '''
     line_length = representation.index('\n')
     down_numbers, across_numbers = list(down_prompts.keys()), list(across_prompts.keys())
-    across_clues = [find_number_info(representation, number, True) for number in across_prompts]
-    down_clues = [find_number_info(representation, number, False) for number in down_prompts]
+    across_clues = {number: find_number_info(representation, number, True) for number in across_prompts}
+    down_clues = {number: find_number_info(representation, number, False) for number in down_prompts}
     model = sentence_transformers.SentenceTransformer(MODEL)
     with open(EMBED_FILE, 'rb') as f:
         embeddings = pickle.loads(f.read())
-    across_answers = {clue: find_closest(model, clue, wordlist, embeddings) for clue in across_clues}
-    down_answers = {clue: find_closest(model, clue, wordlist, embeddings) for clue in down_clues}
-    for x in range(1, NUM_WORDS+1)[::-1]:
+    across_answers = {number: find_closest(model, across_clues[number], wordlist, embeddings, across_prompts[number]) for number in across_clues}
+    down_answers = {number: find_closest(model, down_clues[number], wordlist, embeddings, down_prompts[number]) for number in down_clues}
+    for x in range(2, NUM_WORDS+1)[::-1]:
         temp_across_answers = [answer for answer in across_answers if across_answers[answer][1] == x]
         temp_down_answers = [answer for answer in down_answers if down_answers[answer][1] == x]
-        for i, word in enumerate(temp_down_answers):
-            representation, good, number = change_rep(representation, down_numbers, i, line_length, False, word)
+        for i, key_num in enumerate(temp_down_answers):
+            representation, good, number = change_rep(representation, down_numbers, i, line_length, False, down_answers[key_num][0])
             if good and number in down_prompts:
-                    down_answers[number] = word
+                    down_answers[number] = down_answers[key_num][0]
                     del down_prompts[number]
-        for i, word in enumerate(temp_across_answers):
-            representation, good, number = change_rep(representation, across_numbers, i, line_length, True, word)
+        for i, key_num in enumerate(temp_across_answers):
+            representation, good, number = change_rep(representation, across_numbers, i, line_length, True, across_answers[key_num][0])
             if good and number in across_prompts:
-                across_answers[number] = word
+                across_answers[number] = across_answers[key_num][0]
                 del across_prompts[number]
     return down_answers, across_answers, down_prompts, across_prompts, representation
 
@@ -338,20 +352,16 @@ def solve_board(representation: str, down_prompts: dict[int, str], across_prompt
         `dict[int, str]`: the answers going down.
         `dict[int, str]`: the answers going across.
     '''
-    print(representation)
     df = pd.read_csv('../data/xword.csv')
     wordlist = list(df['Answer'].astype(str))
     previous_length, current_length, none_list = -1, 0, []
     down_answers, across_answers = dict(), dict()
     while (down_prompts or across_prompts) and current_length != previous_length:
-        print(representation)
         down_answers, across_answers, down_prompts, across_prompts, representation = get_closest_words(representation, down_prompts, across_prompts, wordlist, down_answers, across_answers)
-        print(representation)
         down_answers, across_answers, down_prompts, across_prompts, representation = filter_unique(representation, wordlist, down_prompts, across_prompts, down_answers, across_answers)
         down_nones, across_nones, down_prompts, across_prompts = get_none(representation, wordlist, down_prompts, across_prompts)
         previous_length = current_length
         current_length = len(down_answers) + len(across_answers)
-    print(representation)
     for prompt in down_nones:
         down_prompts[prompt] = down_nones[prompt]
     for prompt in across_prompts:
