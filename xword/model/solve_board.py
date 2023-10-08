@@ -150,13 +150,12 @@ def find_closest(model: sentence_transformers.SentenceTransformer, clue: str, wo
     word = max([wordlist[indeces[ind]] for ind in nearest], key=item_counter.get)
     return word if item_counter[word] > 1 else None, item_counter[word]
 
-def change_rep(representation: str, numbers: list[int], i: int, line_length: int, across: bool, answer: str) -> tuple[str, bool, typing.Optional[int]]:
+def change_rep(representation: str, number: int, line_length: int, across: bool, answer: str) -> tuple[str, bool, typing.Optional[int]]:
     '''
     Change the representation string, ensuring no changes are made that conflict with past changes.
     Arguments:
         `representation: str`: the string representation of a crossword board.
-        `numbers: list[int]`: the list of numbers in the prompt list
-        `i: int`: the index of the prompt in the prompt list.
+        `number: int`: the number of the prompt.
         `line_length: int`: the length of a line.
         `across: bool`: whether the word goes across.
         `answer: str`: the string to change it to.
@@ -166,7 +165,7 @@ def change_rep(representation: str, numbers: list[int], i: int, line_length: int
         `int`: the number of the word.
     '''
     representation = representation.replace('\n', '')
-    char_index = find_rep_index(representation, numbers[i], line_length)
+    char_index = find_rep_index(representation, number, line_length)
     word = find_word_rep(representation, char_index, across, line_length)
     bad = False
     for char in answer:
@@ -175,14 +174,14 @@ def change_rep(representation: str, numbers: list[int], i: int, line_length: int
             break
         char_index += 1 if across else line_length
     if bad:
-        return representation, not bad, numbers[i] if i < len(numbers) else None
+        return representation, not bad, number
     char_index -= len(word) if across else line_length * len(word)
     for char in answer:
         representation = representation[:char_index] + char + representation[char_index+1:]
         char_index += 1 if across else line_length
     for i in range(1, len(representation)//line_length):
         representation = representation[:i*line_length+(i-1)] + '\n' + representation[i*line_length+(i-1):]
-    return representation, not bad, numbers[i] if i < len(numbers) else None
+    return representation, not bad, number
 
 def model_fill(clue: str, clue_list: list[str]) -> str:
     '''
@@ -296,7 +295,7 @@ def get_none(representation: str, wordlist: list[str], down_prompts: dict[int, s
         if char != '!' and down_word:
             if len(filter_wordlist(find_number_info(representation, number, False), wordlist)) == 0 and number in down_prompts:
                 down_nones[number] = down_prompts[number]
-                del down_promts[number]
+                del down_prompts[number]
     return down_nones, across_nones, down_prompts, across_prompts
 
 def get_closest_words(representation: str, down_prompts: dict[int, str], across_prompts: dict[int, str], wordlist: list[str], 
@@ -329,16 +328,20 @@ def get_closest_words(representation: str, down_prompts: dict[int, str], across_
     for x in range(2, NUM_WORDS+1)[::-1]:
         temp_across_answers = [answer for answer in across_answers if across_answers[answer][1] == x]
         temp_down_answers = [answer for answer in down_answers if down_answers[answer][1] == x]
-        for i, key_num in enumerate(temp_down_answers):
-            representation, good, number = change_rep(representation, down_numbers, i, line_length, False, down_answers[key_num][0])
+        for key_num in temp_down_answers:
+            representation, good, number = change_rep(representation, key_num, line_length, False, down_answers[key_num][0])
             if good and number in down_prompts:
                     down_answers[number] = down_answers[key_num][0]
                     del down_prompts[number]
-        for i, key_num in enumerate(temp_across_answers):
-            representation, good, number = change_rep(representation, across_numbers, i, line_length, True, across_answers[key_num][0])
+        for key_num in temp_across_answers:
+            representation, good, number = change_rep(representation, key_num, line_length, True, across_answers[key_num][0])
             if good and number in across_prompts:
                 across_answers[number] = across_answers[key_num][0]
                 del across_prompts[number]
+    temp_rep = representation
+    for i in range(1, len(temp_rep)//line_length):
+        temp_rep = temp_rep[:i*line_length+i] + '\n' + temp_rep[i*line_length+i:]
+    representation = temp_rep
     return down_answers, across_answers, down_prompts, across_prompts, representation
 
 def solve_board(representation: str, down_prompts: dict[int, str], across_prompts: dict[int, str]) -> tuple[dict[int, str], dict[int, str]]:
