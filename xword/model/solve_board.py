@@ -338,10 +338,6 @@ def get_closest_words(representation: str, down_prompts: dict[int, str], across_
             if good and number in across_prompts:
                 across_answers[number] = across_answers[key_num][0]
                 del across_prompts[number]
-    temp_rep = representation
-    for i in range(1, len(temp_rep)//line_length):
-        temp_rep = temp_rep[:i*line_length+i] + '\n' + temp_rep[i*line_length+i:]
-    representation = temp_rep
     return down_answers, across_answers, down_prompts, across_prompts, representation
 
 def solve_board(representation: str, down_prompts: dict[int, str], across_prompts: dict[int, str]) -> tuple[dict[int, str], dict[int, str]]:
