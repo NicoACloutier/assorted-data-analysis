@@ -1,9 +1,9 @@
 import sentence_transformers, nltk
-import string, pickle, collections, typing
+import string, pickle, collections, typing, re
 import pandas as pd
 import numpy as np
 
-MODEL = 'bert-base-uncased'
+MODEL = sentence_transformers.SentenceTransformer('bert-base-uncased')
 DATA_FILE = '../data/xword.csv'
 EMBED_FILE = '../data/embeddings'
 NUM_WORDS = 5
@@ -185,7 +185,7 @@ def change_rep(representation: str, number: int, line_length: int, across: bool,
 
 def model_fill(clue: str, clue_list: list[str]) -> str:
     '''
-    Probabalistically fill unfilled characters in a clue given a prompt list.
+    Probabilistically fill unfilled characters in a clue given a prompt list.
     Arguments:
         `clue: str`: the clue as it currently is, with letters not yet filled in.
         `clue_list: list[str]`: the list of representations of clues.
@@ -201,7 +201,7 @@ def model_fill(clue: str, clue_list: list[str]) -> str:
         if char == '_':
             char_list = [prompt[i] for prompt in temp_prompt_list]
             char_counter = collections.Counter(char_list)
-            clue[i] = max(char_counter, key=lambda x: char_counter[x])
+            clue = clue[:i] + max(char_counter, key=lambda x: char_counter[x]) + clue[i+1:]
     return clue
 
 def update_rep(representation: str, current_char: int, wordlist: list[str], answers: dict[int, str], prompts: dict[int, str],
@@ -320,11 +320,10 @@ def get_closest_words(representation: str, down_prompts: dict[int, str], across_
     down_numbers, across_numbers = list(down_prompts.keys()), list(across_prompts.keys())
     across_clues = {number: find_number_info(representation, number, True) for number in across_prompts}
     down_clues = {number: find_number_info(representation, number, False) for number in down_prompts}
-    model = sentence_transformers.SentenceTransformer(MODEL)
     with open(EMBED_FILE, 'rb') as f:
         embeddings = pickle.loads(f.read())
-    across_answers = {number: find_closest(model, across_clues[number], wordlist, embeddings, across_prompts[number]) for number in across_clues}
-    down_answers = {number: find_closest(model, down_clues[number], wordlist, embeddings, down_prompts[number]) for number in down_clues}
+    across_answers = {number: find_closest(MODEL, across_clues[number], wordlist, embeddings, across_prompts[number]) for number in across_clues}
+    down_answers = {number: find_closest(MODEL, down_clues[number], wordlist, embeddings, down_prompts[number]) for number in down_clues}
     for x in range(2, NUM_WORDS+1)[::-1]:
         temp_across_answers = [answer for answer in across_answers if across_answers[answer][1] == x]
         temp_down_answers = [answer for answer in down_answers if down_answers[answer][1] == x]
@@ -353,7 +352,7 @@ def solve_board(representation: str, down_prompts: dict[int, str], across_prompt
     '''
     df = pd.read_csv('../data/xword.csv')
     wordlist = list(df['Answer'].astype(str))
-    previous_length, current_length, none_list = -1, 0, []
+    previous_length, current_length, none_list, line_length = -1, 0, [], representation.index('\n')
     down_answers, across_answers = dict(), dict()
     while (down_prompts or across_prompts) and current_length != previous_length:
         down_answers, across_answers, down_prompts, across_prompts, representation = get_closest_words(representation, down_prompts, across_prompts, wordlist, down_answers, across_answers)
@@ -363,8 +362,15 @@ def solve_board(representation: str, down_prompts: dict[int, str], across_prompt
         current_length = len(down_answers) + len(across_answers)
     for prompt in down_nones:
         down_prompts[prompt] = down_nones[prompt]
-    for prompt in across_prompts:
+    for prompt in across_nones:
         across_prompts[prompt] = across_nones[prompt]
     if down_prompts or across_prompts:
-        representation, down_answers, across_answers = model_fill(representation, wordlist)
+        for prompt in down_prompts:
+            answer = model_fill(find_number_info(representation, prompt, False), wordlist)
+            representation, _, _ = change_rep(representation, prompt, line_length, False, answer)
+            down_answers[prompt] = answer
+        for prompt in across_prompts:
+            answer = model_fill(find_number_info(representation, prompt, True), wordlist)
+            representation, _, _ = change_rep(representation, prompt, line_length, True, answer)
+            across_answers[prompt] = answer
     return down_answers, across_answers
