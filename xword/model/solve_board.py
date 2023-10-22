@@ -174,6 +174,8 @@ def change_rep(representation: str, number: int, line_length: int, across: bool,
             break
         char_index += 1 if across else line_length
     if bad:
+        for i in range(1, len(representation)//line_length):
+            representation = representation[:i*line_length+(i-1)] + '\n' + representation[i*line_length+(i-1):]
         return representation, not bad, number
     char_index -= len(word) if across else line_length * len(word)
     for char in answer:
@@ -234,7 +236,7 @@ def update_rep(representation: str, current_char: int, wordlist: list[str], answ
             del prompts[number]
             for i, char in enumerate(possibilities[0]):
                 index = current_char + i * (1 if across else line_length)
-                representation = representation[index:] + char + representation[index+1:]
+                representation = representation[:index] + char + representation[index+1:]
     return prompts, answers, representation
 
 def filter_unique(representation: str, wordlist: list[str], down_prompts: dict[int, str], across_prompts: dict[int, str], 
@@ -265,7 +267,7 @@ def filter_unique(representation: str, wordlist: list[str], down_prompts: dict[i
         if char != '!' and down_word:
             down_prompts, down_answers, temp_rep = update_rep(temp_rep, i, wordlist, down_answers, down_prompts, number, False, line_length)
     for i in range(1, len(temp_rep)//line_length):
-        temp_rep = temp_rep[:i*line_length+i] + '\n' + temp_rep[i*line_length+i:]
+        temp_rep = temp_rep[:i*line_length+i-1] + '\n' + temp_rep[i*line_length+i-1:]
     representation = temp_rep
     return down_answers, across_answers, down_prompts, across_prompts, representation
 
@@ -339,7 +341,7 @@ def get_closest_words(representation: str, down_prompts: dict[int, str], across_
                 del across_prompts[number]
     return down_answers, across_answers, down_prompts, across_prompts, representation
 
-def solve_board(representation: str, down_prompts: dict[int, str], across_prompts: dict[int, str]) -> tuple[dict[int, str], dict[int, str]]:
+def solve_board(representation: str, down_prompts: dict[int, str], across_prompts: dict[int, str]) -> tuple[dict[int, str], dict[int, str], str]:
     '''
     Solve a crossword board.
     Arguments:
@@ -373,4 +375,4 @@ def solve_board(representation: str, down_prompts: dict[int, str], across_prompt
             answer = model_fill(find_number_info(representation, prompt, True), wordlist)
             representation, _, _ = change_rep(representation, prompt, line_length, True, answer)
             across_answers[prompt] = answer
-    return down_answers, across_answers
+    return down_answers, across_answers, representation
