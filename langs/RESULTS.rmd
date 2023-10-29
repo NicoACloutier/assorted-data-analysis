@@ -1,0 +1,28 @@
+---
+title: "Languages Results"
+output: html_document
+date: "2023-10-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo = TRUE, results = 'hide'}
+library(ggplot2)
+library(tidyverse)
+```
+
+<h2>Change Plots<h2>
+```{r}
+langs <- read.csv("data/cleaned/langs.csv")
+for (fam in unique(langs$family)) {
+    p <- langs %>% 
+        filter(family == fam) %>%
+        ggplot(aes(x=year, y=log(TotalBothSexes), color=language)) +
+            geom_line() +
+            ggtitle(fam)
+    print(p)
+}
+```
+
